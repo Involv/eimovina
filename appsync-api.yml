@@ -1,0 +1,26 @@
+name: ${self:service}-${self:provider.stage}
+authenticationType: API_KEY
+
+apiKeys:
+  - name: test
+    description: Testing key
+
+mappingTemplates:
+  - type: Query
+    field: getProperty
+    dataSource: fetchProperty
+    request: false
+    response: false
+
+  # - type: Mutation
+  #   field: createNote
+  #   dataSource: createNote
+  #   request: false
+  #   response: false
+
+dataSources:
+  - type: AWS_LAMBDA
+    name: fetchProperty
+    description: Lambda for listing notes
+    config:
+      functionName: fetchProperty
