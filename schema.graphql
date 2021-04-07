@@ -1,0 +1,55 @@
+type Property {
+  realEstateListId: String!
+  plotNumber: String!
+  address: String!
+  area: String!
+  rightHolders: [RightHolder]!
+  plotParts: [PlotPart]!
+  objects: [Object]!
+  loans: [Loan]!
+}
+
+type RightHolder {
+  name: String!
+  rightsScope: String!
+  rightsType: String!
+}
+
+type PlotPart {
+  usagePurpose: String!
+  address: String!
+  area: String!
+  buildingNumber: Int!
+  entryDate: String!
+  basisOfAcquisition: String!
+  income: Float!
+  plan: String!
+  sketch: String!
+}
+
+type Object {
+  usagePurpose: String!
+  objectNumber: String!
+  roomCount: String!
+  address: String!
+  buildingNumber: String!
+  area: String!
+  storey: String!
+  basisOfAcquisition: String!
+}
+
+type Loan {
+  usagePurpose: String!
+  objectNumber: String!
+  buildingNumber: String!
+  serialNumber: Int!
+  description: String!
+}
+
+type Query {
+  getProperty(search: String): Property!
+}
+
+schema {
+  query: Query
+}
