@@ -32,24 +32,16 @@ functions:
   fetchProperty:
     handler: functions/getProperty.main
 
-
-Resources:
-  PropertyTable:
-    Type: AWS::DynamoDB::Table
-    Properties:
-      TableName: ${self:service}-${self:provider.stage}-nekretnina
-      AttributeDefinitions:
-        - AttributeName: id
-          AttributeType: S
-        - AttributeName: realEstateListId
-          AttributeType: S
-        - AttributeName: plotNumber
-          AttributeType: S
-        - AttributeName: address
-          AttributeType: S
-        - AttributeName: area
-          AttributeType: S
-      KeySchema:
-        - AttributeName: id
-          KeyType: HASH
-      BillingMode: PAY_PER_REQUEST
+resources:
+  Resources:
+    PropertyTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:service}-${self:provider.stage}-nekretnina
+        AttributeDefinitions:
+          - AttributeName: id
+            AttributeType: S
+        KeySchema:
+          - AttributeName: id
+            KeyType: HASH
+        BillingMode: PAY_PER_REQUEST
