@@ -1,4 +1,5 @@
 name: ${self:service}-${self:provider.stage}
+schema: schema.graphql
 authenticationType: API_KEY
 
 apiKeys:
@@ -7,8 +8,8 @@ apiKeys:
 
 mappingTemplates:
   - type: Query
-    field: getProperty
-    dataSource: fetchProperty
+    field: getProperties
+    dataSource: fetchProperties
     request: false
     response: false
 
@@ -20,7 +21,7 @@ mappingTemplates:
 
 dataSources:
   - type: AWS_LAMBDA
-    name: fetchProperty
+    name: fetchProperties
     description: Lambda for listing notes
     config:
-      functionName: fetchProperty
+      functionName: fetchProperties

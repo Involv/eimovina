@@ -23,14 +23,25 @@ provider:
   #
   #environment:
   #  SAMPLE_ENV_VAR: ${env:SAMPLE_ENV_VAR}
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - dynamodb:Scan
+        - dynamodb:Query
+        - dynamodb:GetItem
+        - dynamodb:PutItem
+        - dynamodb:UpdateItem
+        - dynamodb:DeleteItem
+        - dynamodb:DescribeTable
+      Resource: "arn:aws:dynamodb:eu-central-1:*:*"
 
 custom:
   appSync:
     - ${file(appsync-api.yml)}
 
 functions:
-  fetchProperty:
-    handler: functions/getProperty.main
+  fetchProperties:
+    handler: functions/getProperties.main
 
 resources:
   Resources:
@@ -39,9 +50,24 @@ resources:
       Properties:
         TableName: ${self:service}-${self:provider.stage}-nekretnina
         AttributeDefinitions:
-          - AttributeName: id
+          - AttributeName: realEstateListId
+            AttributeType: S
+          - AttributeName: plotNumber
+            AttributeType: S  
+          - AttributeName: municipalityId-submunicipalityId
             AttributeType: S
         KeySchema:
-          - AttributeName: id
-            KeyType: HASH
+        - AttributeName: realEstateListId
+          KeyType: HASH
+        - AttributeName: municipalityId-submunicipalityId
+          KeyType: RANGE
+        GlobalSecondaryIndexes:
+          - IndexName: PlotNumberIndex
+            KeySchema:
+              - AttributeName: plotNumber
+                KeyType: HASH
+              - AttributeName: municipalityId-submunicipalityId
+                KeyType: RANGE
+            Projection:
+              ProjectionType: ALL
         BillingMode: PAY_PER_REQUEST
