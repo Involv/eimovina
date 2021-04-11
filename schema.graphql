@@ -42,7 +42,7 @@ type Object {
 
 type Loan {
   usagePurpose: String!
-  objectNumber: String!
+  loanNumber: String!
   buildingNumber: String!
   serialNumber: Int!
   description: String!
