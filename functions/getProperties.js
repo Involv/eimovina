@@ -1,28 +1,29 @@
 import handler from "../libs/handler-lib";
 import dynamoDb from "../libs/dynamodb-lib";
 
+const { PROPERTIES_TABLE } = process.env;
+
 export const main = handler(async (event) => {
   const { search }= event.arguments;
-  
-  const paramsRL = {
-    TableName: "eimovina-be-dev-nekretnina",
-    KeyConditionExpression: "realEstateListId = :search",
+  const realEstateListParams = {
+    TableName: PROPERTIES_TABLE,
+    KeyConditionExpression: "realEstateListNumber = :search",
     ExpressionAttributeValues: {
       ":search": search,
     },
   };
 
-  const paramsPL = {
-    TableName: "eimovina-be-dev-nekretnina",
-    IndexName: "PlotNumberIndex",
+  const plotNumberParams = {
+    TableName: PROPERTIES_TABLE,
+    IndexName: 'byPlotNumber',
     KeyConditionExpression: "plotNumber = :search",
     ExpressionAttributeValues: {
       ":search": search,
     },
   };
 
-  const realEstateLists = await dynamoDb.query(paramsRL);
-  const plots = await dynamoDb.query(paramsPL);
+  const realEstateLists = await dynamoDb.query(realEstateListParams);
+  const plots = await dynamoDb.query(plotNumberParams);
 
   const res = [...realEstateLists.Items, ...plots.Items];
 

@@ -8,32 +8,18 @@ package:
 plugins:
   - serverless-bundle # Package our functions with Webpack
   - serverless-offline
-  - serverless-dotenv-plugin # Load .env as environment variables
   - serverless-appsync-plugin
+  - serverless-iam-roles-per-function
 
 provider:
   name: aws
-  runtime: nodejs10.x
+  runtime: nodejs14.x
   stage: dev
   region: eu-central-1
   # To load environment variables externally
   # rename env.example to .env and uncomment
   # the following line. Also, make sure to not
   # commit your .env.
-  #
-  #environment:
-  #  SAMPLE_ENV_VAR: ${env:SAMPLE_ENV_VAR}
-  iamRoleStatements:
-    - Effect: Allow
-      Action:
-        - dynamodb:Scan
-        - dynamodb:Query
-        - dynamodb:GetItem
-        - dynamodb:PutItem
-        - dynamodb:UpdateItem
-        - dynamodb:DeleteItem
-        - dynamodb:DescribeTable
-      Resource: "arn:aws:dynamodb:eu-central-1:*:*"
 
 custom:
   appSync:
@@ -42,27 +28,44 @@ custom:
 functions:
   fetchProperties:
     handler: functions/getProperties.main
+    environment:
+      PROPERTIES_TABLE: !Ref PropertyTable
+    iamRoleStatements:
+      - Effect: Allow
+        Action: dynamodb:Query
+        Resource: 
+          - !GetAtt PropertyTable.Arn
+          - !Sub ${PropertyTable.Arn}/index/byPlotNumber
+  
+  confirmUserSignup:
+    handler: functions/confirm-user-signup.main
+    environment:
+      USERS_TABLE: !Ref UsersTable
+    iamRoleStatements:
+      - Effect: Allow
+        Action: dynamodb:PutItem
+        Resource: !GetAtt UsersTable.Arn
 
 resources:
   Resources:
     PropertyTable:
       Type: AWS::DynamoDB::Table
       Properties:
-        TableName: ${self:service}-${self:provider.stage}-nekretnina
+        BillingMode: PAY_PER_REQUEST
         AttributeDefinitions:
-          - AttributeName: realEstateListId
+          - AttributeName: realEstateListNumber
             AttributeType: S
           - AttributeName: plotNumber
             AttributeType: S  
           - AttributeName: municipalityId-submunicipalityId
             AttributeType: S
         KeySchema:
-        - AttributeName: realEstateListId
+        - AttributeName: realEstateListNumber
           KeyType: HASH
         - AttributeName: municipalityId-submunicipalityId
           KeyType: RANGE
         GlobalSecondaryIndexes:
-          - IndexName: PlotNumberIndex
+          - IndexName: byPlotNumber
             KeySchema:
               - AttributeName: plotNumber
                 KeyType: HASH
@@ -70,4 +73,58 @@ resources:
                 KeyType: RANGE
             Projection:
               ProjectionType: ALL
+    
+    UsersTable:
+      Type: AWS::DynamoDB::Table
+      Properties: 
         BillingMode: PAY_PER_REQUEST
+        AttributeDefinitions:
+          - AttributeName: id
+            AttributeType: S
+        KeySchema:
+          - AttributeName: id
+            KeyType: HASH
+        
+    CognitoUserPool:
+      Type: AWS::Cognito::UserPool
+      Properties:
+        AutoVerifiedAttributes:
+          - email
+        Policies:
+          PasswordPolicy:
+            MinimumLength: 8
+            RequireLowercase: true
+            RequireNumbers: true
+            RequireUppercase: true
+            RequireSymbols: true
+        UsernameAttributes:
+          - email
+        Schema:
+          - AttributeDataType: String
+            Name: name
+            Required: true
+            Mutable: true
+        LambdaConfig:
+          PostConfirmation: !GetAtt ConfirmUserSignupLambdaFunction.Arn
+
+    UserPoolInvokeConfirmUserSignupLambdaPermission:
+      Type: AWS::Lambda::Permission
+      Properties:
+        Action: lambda:invokeFunction
+        FunctionName: !Ref ConfirmUserSignupLambdaFunction
+        Principal: cognito-idp.amazonaws.com
+        SourceArn: !GetAtt CognitoUserPool.Arn
+
+    WebUserPoolClient:
+      Type: AWS::Cognito::UserPoolClient
+      Properties:
+        UserPoolId: !Ref CognitoUserPool
+        ClientName: web
+        ExplicitAuthFlows:
+          - ALLOW_USER_SRP_AUTH
+          - ALLOW_USER_PASSWORD_AUTH
+          - ALLOW_REFRESH_TOKEN_AUTH
+        PreventUserExistenceErrors: ENABLED
+
+
+  

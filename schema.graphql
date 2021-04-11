@@ -1,5 +1,5 @@
 type Property {
-  realEstateListId: String!
+  realEstateListNumber: String!
   plotNumber: String!
   address: String
   area: String
