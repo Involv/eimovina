@@ -38,12 +38,21 @@ functions:
           - !Sub ${PropertyTable.Arn}/index/byPlotNumber
   
   confirmUserSignup:
-    handler: functions/confirm-user-signup.main
+    handler: functions/confirmUserSignup.main
     environment:
       USERS_TABLE: !Ref UsersTable
     iamRoleStatements:
       - Effect: Allow
         Action: dynamodb:PutItem
+        Resource: !GetAtt UsersTable.Arn
+  
+  updateUser:
+    handler: functions/updateUser.main
+    environment:
+      USERS_TABLE: !Ref UsersTable
+    iamRoleStatements:
+      - Effect: Allow
+        Action: dynamodb:UpdateItem
         Resource: !GetAtt UsersTable.Arn
 
 resources:

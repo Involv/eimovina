@@ -12,16 +12,20 @@ mappingTemplates:
     dataSource: fetchProperties
     request: false
     response: false
-
-  # - type: Mutation
-  #   field: createNote
-  #   dataSource: createNote
-  #   request: false
-  #   response: false
+  - type: Mutation
+    field: updateUser
+    dataSource: updateUser
+    request: false
+    response: false
 
 dataSources:
   - type: AWS_LAMBDA
     name: fetchProperties
-    description: Lambda for listing notes
+    description: Lambda for listing properties
     config:
       functionName: fetchProperties
+  - type: AWS_LAMBDA
+    name: updateUser
+    description: Lambda for updating user
+    config:
+      functionName: updateUser

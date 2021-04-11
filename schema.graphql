@@ -52,6 +52,17 @@ type Query {
   getProperties(search: String): [Property!]!
 }
 
+type User {
+  name: String!
+  createdAt: String
+  lastUpdatedAt: String
+}
+
+type Mutation {
+  updateUser(userId: String): User
+}
+
 schema {
   query: Query
+  mutation: Mutation
 }
