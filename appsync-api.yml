@@ -23,7 +23,7 @@ dataSources:
     name: fetchProperties
     description: Lambda for listing properties
     config:
-      functionName: fetchProperties
+      functionName: getPropertiesAlgolia
   - type: AWS_LAMBDA
     name: updateUser
     description: Lambda for updating user
