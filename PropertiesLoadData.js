@@ -41,8 +41,9 @@ function mapData(data) {
 
 function mapProperties(data) {
   let params = {
-    TableName: "Properties",
+    TableName: "eimovina-be-dev-nekretnina",
     Item: {
+      id: String(Date.now()),
       realEstateListNumber: "",
       plotNumber: "",
       address: "",
