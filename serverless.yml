@@ -20,41 +20,21 @@ provider:
     ALGOLIA_APP_ID: ${ssm:eimovina-be-algolia-app-id}
     ALGOLIA_ADMIN_API_KEY: ${ssm:eimovina-be-algolia-admin-api-key}
     ALGOLIA_INDEX_NAME: eimovina-be-property-index
-  # To load environment variables externally
-  # rename env.example to .env and uncomment
-  # the following line. Also, make sure to not
-  # commit your .env.
 
 custom:
   appSync:
     - ${file(appsync-api.yml)}
 
 functions:
-  fetchProperties:
-    handler: functions/getProperties.main
-    environment:
-      PROPERTIES_TABLE: !Ref PropertyTable
-    iamRoleStatements:
-      - Effect: Allow
-        Action: dynamodb:Query
-        Resource: 
-          - !GetAtt PropertyTable.Arn
-          - !Sub ${PropertyTable.Arn}/index/byPlotNumber
-  
-  updateAlgoliaIndex:
+  syncPropertyAlgolia:
     handler: functions/syncPropertyAlgolia.main
     events:
       - stream:
           type: dynamodb
-          batchSize: 1
-          startingPosition: LATEST
-          arn:
-            Fn::GetAtt:
-              - PropertyTable
-              - StreamArn
+          arn: !GetAtt PropertyTable.StreamArn
 
-  getPropertiesAlgolia:
-    handler: functions/getPropertiesAlgolia.main
+  getProperties:
+    handler: functions/getProperties.main
   
   confirmUserSignup:
     handler: functions/confirmUserSignup.main
@@ -92,26 +72,11 @@ resources:
         StreamSpecification:
           StreamViewType: NEW_IMAGE
         AttributeDefinitions:
-          - AttributeName: realEstateListNumber
-            AttributeType: S
-          - AttributeName: plotNumber
-            AttributeType: S  
-          - AttributeName: municipalityId-submunicipalityId
+          - AttributeName: id
             AttributeType: S
         KeySchema:
-        - AttributeName: realEstateListNumber
+        - AttributeName: id
           KeyType: HASH
-        - AttributeName: municipalityId-submunicipalityId
-          KeyType: RANGE
-        GlobalSecondaryIndexes:
-          - IndexName: byPlotNumber
-            KeySchema:
-              - AttributeName: plotNumber
-                KeyType: HASH
-              - AttributeName: municipalityId-submunicipalityId
-                KeyType: RANGE
-            Projection:
-              ProjectionType: ALL
     
     UsersTable:
       Type: AWS::DynamoDB::Table

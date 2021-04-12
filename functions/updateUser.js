@@ -15,6 +15,5 @@ export const main = async (event) => {
   };
 
   const updatedUser = await dynamoDb.update(params);
-  console.log("UPDATED: ", updatedUser);
   return updatedUser.Attributes;
 };

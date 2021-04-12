@@ -1,31 +1,21 @@
 import handler from "../libs/handler-lib";
-import dynamoDb from "../libs/dynamodb-lib";
+import algoliasearch from "algoliasearch";
 
-const { PROPERTIES_TABLE } = process.env;
+const client = algoliasearch(process.env.ALGOLIA_APP_ID, process.env.ALGOLIA_ADMIN_API_KEY);
+const index = client.initIndex(process.env.ALGOLIA_INDEX_NAME);
+index.setSettings({
+  "searchableAttributes": [
+    "realEstateListNumber, plotNumber",
+  ]
+});
 
 export const main = handler(async (event) => {
+  console.log('searchAlgoliaIndex main was called');
   const { search }= event.arguments;
-  const realEstateListParams = {
-    TableName: PROPERTIES_TABLE,
-    KeyConditionExpression: "realEstateListNumber = :search",
-    ExpressionAttributeValues: {
-      ":search": search,
-    },
-  };
+  console.log(search);
 
-  const plotNumberParams = {
-    TableName: PROPERTIES_TABLE,
-    IndexName: 'byPlotNumber',
-    KeyConditionExpression: "plotNumber = :search",
-    ExpressionAttributeValues: {
-      ":search": search,
-    },
-  };
+  const res = await index.search(search);
+  console.log("Algolia search result: ", res);
 
-  const realEstateLists = await dynamoDb.query(realEstateListParams);
-  const plots = await dynamoDb.query(plotNumberParams);
-
-  const res = [...realEstateLists.Items, ...plots.Items];
-
-  return res;
+  return res.hits;
 });

@@ -41,7 +41,7 @@ function mapData(data) {
 
 function mapProperties(data) {
   let params = {
-    TableName: "eimovina-be-dev-nekretnina",
+    TableName: "eimovina-be-dev-PropertyTable-13945OFDRGG8G",
     Item: {
       id: String(Date.now()),
       realEstateListNumber: "",
@@ -57,14 +57,14 @@ function mapProperties(data) {
   }
   for (const property in data) {
     params.Item.realEstateListNumber = data["list"].broj_lista,
-      params.Item.plotNumber = data["list"].broj_parcele,
-      params.Item.address = data["deloviParcela"].rows[0].adresa,
-      params.Item.rightHolders = mapRightHolders(data["vlasniciZemljista"].rows),
-      params.Item.plotParts = mapPlotParts(data["deloviParcela"].rows),
-      params.Item.objects = mapObjects(data["objekti"].rows),
-      params.Item.loans = mapLoans(data["tereti"].rows),
-      params.Item.municipalityId = data["list"].oznaka_kat_opstine,
-      params.Item.submunicipalityId = data["list"].oznaka_kat_opstine
+    params.Item.plotNumber = data["list"].broj_parcele || "",
+    params.Item.address = data["deloviParcela"].rows[0].adresa,
+    params.Item.rightHolders = mapRightHolders(data["vlasniciZemljista"].rows),
+    params.Item.plotParts = mapPlotParts(data["deloviParcela"].rows),
+    params.Item.objects = mapObjects(data["objekti"].rows),
+    params.Item.loans = mapLoans(data["tereti"].rows),
+    params.Item.municipalityId = data["list"].oznaka_kat_opstine,
+    params.Item.submunicipalityId = data["list"].oznaka_kat_opstine
   }
 
   return params

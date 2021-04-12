@@ -9,7 +9,7 @@ apiKeys:
 mappingTemplates:
   - type: Query
     field: getProperties
-    dataSource: fetchProperties
+    dataSource: getProperties
     request: false
     response: false
   - type: Mutation
@@ -20,10 +20,10 @@ mappingTemplates:
 
 dataSources:
   - type: AWS_LAMBDA
-    name: fetchProperties
+    name: getProperties
     description: Lambda for listing properties
     config:
-      functionName: getPropertiesAlgolia
+      functionName: getProperties
   - type: AWS_LAMBDA
     name: updateUser
     description: Lambda for updating user
