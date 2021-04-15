@@ -5,6 +5,7 @@ import { SearchBar } from "../../../components/SearchBar";
 import { Property } from "../../../models/property.model";
 import { ResultCard } from "../components/ResultCard";
 import { AuthorizationContext } from "../../authentification/components/Authorization";
+import { LocalStorageKeys } from "../../authentification/enums/local-storage-keysenum.";
 
 const FETCH_PROPERTIES_QUERY = gql`
   query MyQuery($search: String!) {
@@ -21,8 +22,8 @@ const FETCH_PROPERTIES_QUERY = gql`
 `;
 
 const UPDATE_USER = gql`
-  mutation UpdateUser($userId: String!) {
-    updateUser(userId: $userId) {
+  mutation UpdateUser {
+    updateUser {
       name
     }
   }
@@ -39,10 +40,13 @@ export const HomePage = () => {
     }
   );
 
-  const [updateUser, { data }] = useMutation(UPDATE_USER);
+  const { user } = useContext(AuthorizationContext);
 
-  const { isLoggedIn, loggedUser } = useContext(AuthorizationContext);
+  const [updateUser, { data }] = useMutation(UPDATE_USER);
   const [isSearchTriggered, setIsSearchTriggered] = useState<boolean>(false);
+  const [showUserUpdatedMessage, setShowUserUpdatedMessage] = useState<boolean>(
+    false
+  );
 
   const onSearchSubmit = (searchTerm: string) => {
     getProperties({ variables: { search: searchTerm } });
@@ -50,8 +54,10 @@ export const HomePage = () => {
   };
 
   const onUpdateUserClick = () => {
-    console.log(loggedUser()?.getUsername());
-    updateUser({ variables: { userId: loggedUser()?.getUsername() } });
+    const userId = user?.getUsername();
+    updateUser({ variables: { userId } });
+    setShowUserUpdatedMessage(true);
+    setTimeout(() => setShowUserUpdatedMessage(false), 3000);
   };
 
   return (
@@ -74,7 +80,7 @@ export const HomePage = () => {
         </div>
       )}
 
-      {isLoggedIn() && (
+      {user && (
         <div className="mt-10">
           <button
             className="bg-blue-400 hover:bg-blue-500 rounded text-white p-2 pl-4 pr-4 ml-3"
@@ -84,6 +90,12 @@ export const HomePage = () => {
               Ažuriraj korisnika
             </p>
           </button>
+
+          {showUserUpdatedMessage && (
+            <div className="text-green-400 mt-6 ml-3">
+              Korisnik je uspješno ažuriran!
+            </div>
+          )}
         </div>
       )}
     </div>

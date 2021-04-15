@@ -12,15 +12,20 @@ import {
 } from "@apollo/client";
 import { ApolloProvider } from "@apollo/client/react";
 import AwsSyncConfig from "./aws/aws-export";
+import { LocalStorageKeys } from "./modules/authentification/enums/local-storage-keysenum.";
 
 const httpLink = new HttpLink({
   uri: AwsSyncConfig.aws_appsync_graphqlEndpoint,
 });
 
 const authMiddleware = new ApolloLink((operation: any, forward: any) => {
+  const accessToken = localStorage.getItem(
+    LocalStorageKeys.eimovinaAccessToken
+  );
   operation.setContext({
     headers: {
-      "x-api-key": AwsSyncConfig.aws_appsync_apiKey,
+      "x-api-key": !accessToken ? AwsSyncConfig.aws_appsync_apiKey : "",
+      authorization: accessToken || "",
     },
   });
 

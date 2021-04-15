@@ -3,15 +3,15 @@ import {
   CognitoUser,
   CognitoUserSession,
 } from "amazon-cognito-identity-js";
-import React, { createContext, FC } from "react";
+import React, { createContext, FC, useEffect, useState } from "react";
 import { UserPool } from "../../../aws/UserPool";
+import { LocalStorageKeys } from "../enums/local-storage-keysenum.";
 
 interface AuthorizationContextProps {
   authenticate: (Username: string, Password: string) => Promise<unknown>;
   getSession: () => Promise<unknown>;
   logout: () => void;
-  isLoggedIn: () => boolean;
-  loggedUser: () => CognitoUser | null;
+  user: CognitoUser | null;
 }
 
 const AuthorizationContext = createContext<AuthorizationContextProps>(
@@ -19,6 +19,12 @@ const AuthorizationContext = createContext<AuthorizationContextProps>(
 );
 
 const Authorization: FC = ({ children }) => {
+  const [user, setUser] = useState<CognitoUser | null>(null);
+
+  useEffect(() => {
+    getSession().then(() => setUser(UserPool.getCurrentUser()));
+  }, []);
+
   const getSession = async () =>
     await new Promise((resolve, reject) => {
       const user = UserPool.getCurrentUser();
@@ -37,10 +43,6 @@ const Authorization: FC = ({ children }) => {
       }
     });
 
-  const isLoggedIn = () => (loggedUser() ? true : false);
-
-  const loggedUser = () => UserPool.getCurrentUser();
-
   const authenticate = async (Username: string, Password: string) =>
     await new Promise((resolve, reject) => {
       const user = new CognitoUser({
@@ -56,6 +58,12 @@ const Authorization: FC = ({ children }) => {
       user.authenticateUser(authDetails, {
         onSuccess: (data) => {
           console.log("onSucess", data);
+          setUser(user);
+          const accessToken = data.getAccessToken().getJwtToken();
+          localStorage.setItem(
+            LocalStorageKeys.eimovinaAccessToken,
+            accessToken
+          );
           resolve(data);
         },
         onFailure: (err) => {
@@ -68,6 +76,8 @@ const Authorization: FC = ({ children }) => {
   const logout = () => {
     const user = UserPool.getCurrentUser();
     if (user) {
+      setUser(null);
+      localStorage.removeItem(LocalStorageKeys.eimovinaAccessToken);
       user.signOut();
     }
   };
@@ -77,8 +87,7 @@ const Authorization: FC = ({ children }) => {
         authenticate,
         getSession,
         logout,
-        isLoggedIn,
-        loggedUser,
+        user,
       }}
     >
       {children}
