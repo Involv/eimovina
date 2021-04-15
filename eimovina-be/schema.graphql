@@ -1,0 +1,70 @@
+type Property @aws_api_key @aws_cognito_user_pools {
+  realEstateListNumber: String!
+  plotNumber: String!
+  address: String
+  area: String
+  rightHolders: [RightHolder]
+  plotParts: [PlotPart]
+  objects: [Object]
+  loans: [Loan]
+  municipalityId: String
+  submunicipalityId: String
+}
+
+type RightHolder @aws_api_key @aws_cognito_user_pools {
+  name: String!
+  rightsScope: String!
+  rightsType: String!
+}
+
+type PlotPart @aws_api_key @aws_cognito_user_pools {
+  usagePurpose: String!
+  address: String!
+  area: String!
+  buildingNumber: Int!
+  entryDate: String!
+  basisOfAcquisition: String!
+  income: Float!
+  plan: String!
+  sketch: String!
+}
+
+type Object @aws_api_key @aws_cognito_user_pools {
+  usagePurpose: String!
+  objectNumber: String!
+  roomCount: String!
+  address: String!
+  buildingNumber: String!
+  area: String!
+  storey: String!
+  basisOfAcquisition: String!
+}
+
+type Loan @aws_api_key @aws_cognito_user_pools {
+  usagePurpose: String!
+  loanNumber: String!
+  buildingNumber: String!
+  serialNumber: Int!
+  description: String!
+}
+
+type Query {
+  getProperties(search: String): [Property!]!
+    @aws_api_key
+    @aws_cognito_user_pools
+}
+
+type User @aws_api_key @aws_cognito_user_pools {
+  name: String!
+  createdAt: String
+  lastUpdatedAt: String
+}
+
+type Mutation {
+  updateUser: User @aws_cognito_user_pools
+}
+
+schema {
+  query: Query
+  mutation: Mutation
+}
