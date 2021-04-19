@@ -4,7 +4,8 @@
   "description": "A Node.js starter for Serverless Framework with ES6 and TypeScript support",
   "main": "handler.js",
   "scripts": {
-    "test": "serverless-bundle test"
+    "test": "serverless-bundle test",
+    "sls": "sls"
   },
   "author": "",
   "license": "MIT",
@@ -14,15 +15,16 @@
   },
   "devDependencies": {
     "aws-sdk": "^2.881.0",
+    "serverless": "2.4.0",
+    "serverless-appsync-plugin": "^1.9.0",
     "serverless-bundle": "3.2.0",
+    "serverless-iam-roles-per-function": "^3.1.0",
     "serverless-offline": "^5.3.3"
   },
   "dependencies": {
     "algoliasearch": "^4.8.6",
     "request": "^2.88.2",
     "request-promise": "^4.2.6",
-    "serverless-appsync-plugin": "^1.9.0",
-    "serverless-iam-roles-per-function": "^3.1.0",
     "uuid": "^7.0.3"
   }
 }

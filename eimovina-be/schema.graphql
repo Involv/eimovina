@@ -1,3 +1,23 @@
+schema {
+  query: Query
+  mutation: Mutation
+}
+
+type Query {
+  getProperties(search: String, limit: Int!, nextToken: String): PropertiesPage
+    @aws_api_key
+    @aws_cognito_user_pools
+}
+
+type Mutation {
+  updateUser: User @aws_cognito_user_pools
+}
+
+type PropertiesPage @aws_api_key @aws_cognito_user_pools {
+  properties: [Property!]
+  nextToken: String
+}
+
 type Property @aws_api_key @aws_cognito_user_pools {
   realEstateListNumber: String!
   plotNumber: String!
@@ -48,23 +68,8 @@ type Loan @aws_api_key @aws_cognito_user_pools {
   description: String!
 }
 
-type Query {
-  getProperties(search: String): [Property!]!
-    @aws_api_key
-    @aws_cognito_user_pools
-}
-
 type User @aws_api_key @aws_cognito_user_pools {
   name: String!
-  createdAt: String
-  lastUpdatedAt: String
-}
-
-type Mutation {
-  updateUser: User @aws_cognito_user_pools
-}
-
-schema {
-  query: Query
-  mutation: Mutation
+  createdAt: AWSDateTime!
+  lastUpdatedAt: AWSDateTime
 }

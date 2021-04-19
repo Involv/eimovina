@@ -7,5 +7,8 @@ export const main = handler(async (event) => {
   console.log("SEARCH: ", search);
   const res = await index.search(search);
   console.log("Algolia search result: ", res);
-  return res.hits;
+  return {
+    properties: res.hits,
+    nextToken: null
+  };
 });
