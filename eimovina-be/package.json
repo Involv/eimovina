@@ -8,6 +8,7 @@
     "sls": "sls"
   },
   "author": "",
+  "type": "module",
   "license": "MIT",
   "repository": {
     "type": "git",

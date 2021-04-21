@@ -1,67 +1,74 @@
-const AWS = require("aws-sdk")
+import AWS from "aws-sdk";
 
-const fetch = require("node-fetch");
-const FormData = require('form-data');
+import fetch from "node-fetch";
+import FormData from "form-data";
 
 AWS.config.update({
   region: "eu-central-1",
-})
+});
 
-const docClient = new AWS.DynamoDB.DocumentClient()
+const docClient = new AWS.DynamoDB.DocumentClient();
 
 const municipality = {
   id: 16,
   name: "PODGORICA",
   submunicipalityId: 55,
   submunicipalityName: "PODGORICA III",
-}
+};
 
-const main = async () => {
-  const result = await scrapeData()
-  const mappedData = mapData(result)
-  putToDynamoDb(mappedData)
-}
+export const main = async (event) => {
+  const result = await scrapeData();
+  const mappedData = mapData(result);
+  putToDynamoDb(mappedData);
+};
 
 const putToDynamoDb = properties => {
   properties.forEach(async (property) => {
     await docClient.put(property, (err, data) => {
       if (err) {
-        console.error("Unable to add property. Error JSON:", JSON.stringify(err, null, 2))
+        console.error("Unable to add property. Error JSON:", JSON.stringify(err, null, 2));
       } else {
-        console.log("PutItem succeeded ", property)
+        console.log("PutItem succeeded ", property);
       }
-    })
-  })
-}
+    });
+  });
+};
 
 const mapData = data => {
-  const params = []
-  data.forEach(item => params.push(mapProperties(item.searchResult)))
-  return params
-}
+  const params = [];
+  data.forEach(item => params.push(mapProperties(item.searchResult)));
+  return params;
+};
 
 const mapProperties = data => {
-  const {list, deloviParcela} = data
+  const {list, deloviParcela} = data;
 
-  let plotNumber = list.broj_parcele?.trim()
-  if (!plotNumber && deloviParcela?.rows?.length > 0) {
-    plotNumber = deloviParcela.rows[0].broj
+  let plotPartsCount = 0;
+  if (deloviParcela && deloviParcela.rows) {
+    plotPartsCount = deloviParcela.rows.length;
   }
 
-  let address = ""
-  if (deloviParcela?.rows?.length > 0) {
-    address = deloviParcela?.rows[0].adresa
+  let plotNumber = "";
+  if (list.broj_parcele && list.broj_parcele.trim()) {
+    plotNumber = list.broj_parcele.trim();
+  } else if (!plotNumber && plotPartsCount > 0) {
+    plotNumber = deloviParcela.rows[0].broj;
+  }
+
+  let address = "";
+  if (plotPartsCount > 0) {
+    address = deloviParcela.rows[0].adresa;
   }
 
   const municipalityId = list.poid || "";
   const submunicipalityId = list.koid || "";
   const realEstateListNumber = list.broj_lista || "";
   const id = `${municipalityId}/` +
-            `${submunicipalityId}/` +
-            `${realEstateListNumber}`
+  `${submunicipalityId}/` +
+  `${realEstateListNumber}`;
 
   const params = {
-    TableName: "eimovina-be-dev-PropertyTable-4QA846IYUB33",
+    TableName: process.env.PROPERTIES_TABLE,
     Item: {
       id,
       realEstateListNumber,
@@ -76,26 +83,26 @@ const mapProperties = data => {
       submunicipalityId,
       submunicipalityName: list.naziv_kat_opstine || "",
     }
-  }
+  };
 
-  return params
-}
+  return params;
+};
 
 const mapRightHolders = data => {
-  result = []
+  const result = [];
   data.forEach(item => {
     result.push({
       name: item.imePrezime,
       rightsScope: item.udeo,
       rightsType: item.vrstaPrava
-    })
-  })
+    });
+  });
 
-  return result
-}
+  return result;
+};
 
 const mapPlotParts = data => {
-  result = []
+  const result = [];
   data.forEach(item => {
     result.push({
       usagePurpose: item.nacinKoriscenja,
@@ -107,14 +114,14 @@ const mapPlotParts = data => {
       income: item.prihod,
       plan: item.plan,
       sketch: item.skica
-    })
-  })
+    });
+  });
 
-  return result
-}
+  return result;
+};
 
 const mapObjects = data => {
-  result = []
+  const result = [];
   data.forEach(item => {
     result.push({
       usagePurpose: item.nacinKoriscenja,
@@ -125,14 +132,14 @@ const mapObjects = data => {
       area: item.povrsina,
       storey: item.spratnost,
       basisOfAcquisition: item.osnov
-    })
-  })
+    });
+  });
 
-  return result
-}
+  return result;
+};
 
 const mapLoans = data => {
-  result = []
+  const result = [];
   data.forEach(item => {
     result.push({
       usagePurpose: item.nacinKoriscenja,
@@ -140,11 +147,11 @@ const mapLoans = data => {
       buildingNumber: item.redniBroj,
       serialNumber: item.ns,
       description: item.opis,
-    })
-  })
+    });
+  });
 
-  return result
-}
+  return result;
+};
 
 const scrapeData = async () => {
   const loginResp = await fetch("https://ekatastar.me/ekatastar-web/action/elogin", { method: 'GET'});
@@ -165,7 +172,7 @@ const scrapeData = async () => {
         cookie
       },
     }
-  )
+  );
 
   const searchResult = [];
   for (let plotNumber = 1000; plotNumber < 1003; plotNumber++) {
@@ -186,15 +193,13 @@ const scrapeData = async () => {
             cookie
           },
         }
-      )
+      );
       const data = await resp.json();
-      searchResult.push(data)
+      searchResult.push(data);
     } catch(err) {
-      console.log(err)
+      console.log(err);
     }
   }
 
-  return searchResult
-}
-
-main()
+  return searchResult;
+};

@@ -42,7 +42,7 @@ functions:
 
   getProperties:
     handler: functions/getProperties.main
-  
+
   confirmUserSignup:
     handler: functions/confirmUserSignup.main
     environment:
@@ -51,7 +51,7 @@ functions:
       - Effect: Allow
         Action: dynamodb:PutItem
         Resource: !GetAtt UsersTable.Arn
-  
+
   updateUser:
     handler: functions/updateUser.main
     environment:
@@ -61,14 +61,16 @@ functions:
         Action: dynamodb:UpdateItem
         Resource: !GetAtt UsersTable.Arn
 
-  # loadPropertiesData:
-  #   handler: scripts/loadPropertiesData.main
-  #   environment:
-  #     USERS_TABLE: !Ref PropertiesTable
-  #   iamRoleStatements:
-  #     - Effect: Allow
-  #       Action: dynamodb:UpdateItem
-  #       Resource: !GetAtt PropertiesTable.Arn
+  loadPropertiesData:
+    handler: functions/loadPropertiesData.main
+    environment:
+      PROPERTIES_TABLE: !Ref PropertyTable
+    events:
+      - schedule: rate(1 day)
+    iamRoleStatements:
+      - Effect: Allow
+        Action: dynamodb:PutItem
+        Resource: !GetAtt PropertyTable.Arn
 
 resources:
   Resources:
@@ -89,10 +91,10 @@ resources:
             Value: ${self:custom.stage}
           - Key: Name
             Value: property-table
-    
+
     UsersTable:
       Type: AWS::DynamoDB::Table
-      Properties: 
+      Properties:
         BillingMode: PAY_PER_REQUEST
         AttributeDefinitions:
           - AttributeName: id
@@ -105,7 +107,7 @@ resources:
             Value: ${self:custom.stage}
           - Key: Name
             Value: user-table
-        
+
     CognitoUserPool:
       Type: AWS::Cognito::UserPool
       Properties:
@@ -132,7 +134,7 @@ resources:
 
     CognitoDomain:
       Type: AWS::Cognito::UserPoolDomain
-      Properties: 
+      Properties:
         Domain: eimovina-be
         UserPoolId: !Ref CognitoUserPool
 
@@ -154,6 +156,3 @@ resources:
           - ALLOW_USER_PASSWORD_AUTH
           - ALLOW_REFRESH_TOKEN_AUTH
         PreventUserExistenceErrors: ENABLED
-
-
-  
