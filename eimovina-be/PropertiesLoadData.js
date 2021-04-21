@@ -1,8 +1,7 @@
 const AWS = require("aws-sdk")
-const request = require("request-promise").defaults({
-  jar: true,
-  followAllRedirects: true
-})
+
+const fetch = require("node-fetch");
+const FormData = require('form-data');
 
 AWS.config.update({
   region: "eu-central-1",
@@ -42,24 +41,6 @@ const mapData = data => {
 }
 
 const mapProperties = data => {
-  const params = {
-    TableName: "eimovina-be-dev-PropertyTable-3Q89I5IQCB3J",
-    Item: {
-      id: "",
-      realEstateListNumber: "",
-      plotNumber: "",
-      address: "",
-      rightHolders: [],
-      plotParts: [],
-      objects: [],
-      loans: [],
-      municipalityId: "",
-      municipalityName: "",
-      submunicipalityId: "",
-      submunicipalityName: "",
-    }
-  }
-
   const {list, deloviParcela} = data
 
   let plotNumber = list.broj_parcele?.trim()
@@ -72,21 +53,30 @@ const mapProperties = data => {
     address = deloviParcela?.rows[0].adresa
   }
 
-  params.Item.realEstateListNumber = list.broj_lista
-  params.Item.plotNumber = plotNumber || ""
-  params.Item.address = address
-  params.Item.rightHolders = mapRightHolders(data.vlasniciZemljista.rows)
-  params.Item.plotParts = mapPlotParts(deloviParcela.rows)
-  params.Item.objects = mapObjects(data.objekti.rows)
-  params.Item.loans = mapLoans(data.tereti.rows)
-  params.Item.municipalityId = list.poid
-  params.Item.municipalityName = municipality.name
-  params.Item.submunicipalityId = list.koid
-  params.Item.submunicipalityName = list.naziv_kat_opstine
+  const municipalityId = list.poid || "";
+  const submunicipalityId = list.koid || "";
+  const realEstateListNumber = list.broj_lista || "";
+  const id = `${municipalityId}/` +
+            `${submunicipalityId}/` +
+            `${realEstateListNumber}`
 
-  params.Item.id = `${params.Item.municipalityId}/` +
-                    `${params.Item.submunicipalityId}/` +
-                    `${params.Item.realEstateListNumber}`
+  const params = {
+    TableName: "eimovina-be-dev-PropertyTable-4QA846IYUB33",
+    Item: {
+      id,
+      realEstateListNumber,
+      plotNumber: plotNumber || "",
+      address: address || "",
+      rightHolders: mapRightHolders(data.vlasniciZemljista.rows) || [],
+      plotParts: mapPlotParts(deloviParcela.rows) || [],
+      objects: mapObjects(data.objekti.rows) || [],
+      loans: mapLoans(data.tereti.rows) || [],
+      municipalityId,
+      municipalityName: municipality.name || "",
+      submunicipalityId,
+      submunicipalityName: list.naziv_kat_opstine || "",
+    }
+  }
 
   return params
 }
@@ -157,37 +147,48 @@ const mapLoans = data => {
 }
 
 const scrapeData = async () => {
-  const searchResult = []
-  await request.get("https://ekatastar.me/ekatastar-web/action/elogin")
-  await request.post(
+  const loginResp = await fetch("https://ekatastar.me/ekatastar-web/action/elogin", { method: 'GET'});
+  const cookie = loginResp.headers.raw()['set-cookie'];
+
+  const loginForm = new FormData();
+  loginForm.append('username', 'KORISNIK');
+  loginForm.append('password', 'KORISNIK');
+  loginForm.append('opstinaSchema', 'KNZ_PODGORICA');
+  loginForm.append('nazivIzabraneOpstine', 'Podgorica');
+
+  await fetch(
     "https://ekatastar.me/ekatastar-web/action/login",
     {
-      form: {
-        username: "KORISNIK",
-        password: "KORISNIK",
-        opstinaSchema: "KNZ_PODGORICA",
-        nazivIzabraneOpstine: "Podgorica"
-      }
+      method: 'POST',
+      body: loginForm,
+      headers: {
+        cookie
+      },
     }
   )
 
+  const searchResult = [];
   for (let plotNumber = 1000; plotNumber < 1003; plotNumber++) {
     try {
-      const resp = await request.post(
+      const form = new FormData();
+      form.append('opstinaId', municipality.id);
+      form.append('nazivOpstine', municipality.name);
+      form.append('katastarskaOpstinaId', municipality.submunicipalityId);
+      form.append('nazivKatastarskeOpstine', municipality.submunicipalityName);
+      form.append('searchCriteria', 1);
+      form.append('list', plotNumber);
+      const resp = await fetch(
         "https://ekatastar.me/ekatastar-web/action/search/ajax/katastarNepokretnosti",
         {
-          form: {
-            opstinaId: municipality.id,
-            nazivOpstine: municipality.name,
-            katastarskaOpstinaId: municipality.submunicipalityId,
-            nazivKatastarskeOpstine: municipality.submunicipalityName,
-            searchCriteria: 1,
-            list: plotNumber,
-            brojParcele: null
-          }
+          method: 'POST',
+          body: form,
+          headers: {
+            cookie
+          },
         }
       )
-      searchResult.push(JSON.parse(resp))
+      const data = await resp.json();
+      searchResult.push(data)
     } catch(err) {
       console.log(err)
     }
