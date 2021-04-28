@@ -1,6 +1,9 @@
+directive @aws_subscribe(mutations: [String!]!) on FIELD_DEFINITION
+
 schema {
   query: Query
   mutation: Mutation
+  subscription: Subscription
 }
 
 type Query {
@@ -10,7 +13,15 @@ type Query {
 }
 
 type Mutation {
-  updateUser: User @aws_cognito_user_pools
+  updateUser: User
+
+  notifyPropertyUpdated(id: ID!, userId: ID!, propertyId: ID!): Notification!
+    @aws_iam
+}
+
+type Subscription {
+  onNotified(userId: ID!): Notification
+    @aws_subscribe(mutations: ["notifyPropertyUpdated"])
 }
 
 type PropertiesPage @aws_api_key @aws_cognito_user_pools {
@@ -19,6 +30,7 @@ type PropertiesPage @aws_api_key @aws_cognito_user_pools {
 }
 
 type Property @aws_api_key @aws_cognito_user_pools {
+  id: ID!
   realEstateListNumber: String!
   plotNumber: String!
   address: String
@@ -69,7 +81,15 @@ type Loan @aws_api_key @aws_cognito_user_pools {
 }
 
 type User @aws_api_key @aws_cognito_user_pools {
+  id: ID!
   name: String!
   createdAt: AWSDateTime!
   lastUpdatedAt: AWSDateTime
+}
+
+type Notification @aws_iam @aws_cognito_user_pools {
+  id: ID!
+  userId: ID!
+  propertyId: ID!
+  createdAt: AWSDateTime!
 }

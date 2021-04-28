@@ -68,7 +68,7 @@ const mapProperties = data => {
   `${realEstateListNumber}`;
 
   const params = {
-    TableName: process.env.PROPERTIES_TABLE,
+    TableName: "eimovina-be-dev-PropertyTable-13I5Q89FDXH7S",
     Item: {
       id,
       realEstateListNumber,
@@ -203,3 +203,5 @@ const scrapeData = async () => {
 
   return searchResult;
 };
+
+main();
