@@ -22,6 +22,11 @@ mappingTemplates:
     dataSource: updateUser
     request: false
     response: false
+  - type: Mutation
+    field: updateFavoritePropertyId
+    dataSource: updateFavoritePropertyId
+    request: false
+    response: false
 
 dataSources:
   - type: AWS_LAMBDA
@@ -34,3 +39,8 @@ dataSources:
     description: Lambda for updating user
     config:
       functionName: updateUser
+  - type: AWS_LAMBDA
+    name: updateFavoritePropertyId
+    description: Lambda for updating user's favorite property id
+    config:
+      functionName: updateFavoritePropertyId

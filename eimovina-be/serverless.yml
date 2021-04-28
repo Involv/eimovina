@@ -61,6 +61,20 @@ functions:
         Action: dynamodb:UpdateItem
         Resource: !GetAtt UsersTable.Arn
 
+  updateFavoritePropertyId:
+    handler: functions/updateFavoritePropertyId.main
+    environment:
+      USERS_TABLE: !Ref UsersTable
+      PROPERTY_TABLE: !Ref PropertyTable
+    iamRoleStatements:
+      - Effect: Allow
+        Action:
+          - dynamodb:GetItem
+          - dynamodb:UpdateItem
+        Resource:
+          - !GetAtt UsersTable.Arn
+          - !GetAtt PropertyTable.Arn
+
   loadPropertiesData:
     handler: functions/loadPropertiesData.main
     environment:

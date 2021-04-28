@@ -5,12 +5,13 @@ schema {
 
 type Query {
   getProperties(search: String, limit: Int!, nextToken: String): PropertiesPage
-    @aws_api_key
-    @aws_cognito_user_pools
+  @aws_api_key
+  @aws_cognito_user_pools
 }
 
 type Mutation {
   updateUser: User @aws_cognito_user_pools
+  updateFavoritePropertyId(propertyId: String): User @aws_cognito_user_pools
 }
 
 type PropertiesPage @aws_api_key @aws_cognito_user_pools {
@@ -70,6 +71,7 @@ type Loan @aws_api_key @aws_cognito_user_pools {
 
 type User @aws_api_key @aws_cognito_user_pools {
   name: String!
+  favoritePropertyIds: [String]
   createdAt: AWSDateTime!
   lastUpdatedAt: AWSDateTime
 }
