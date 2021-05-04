@@ -22,6 +22,11 @@ provider:
     ALGOLIA_INDEX_NAME: eimovina-be-property-index
 
 custom:
+  # Our stage is based on what is passed in when running serverless
+  # commands. Or falls back to what we have set in the provider section.
+  stage: ${opt:stage, self:provider.stage}
+  # Name of the SST app that's deploying our infrastructure
+  sstApp: ${self:custom.stage}-eimovina-infra
   appSync:
     - ${file(appsync-api.yml)}
 
@@ -31,7 +36,7 @@ functions:
     events:
       - stream:
           type: dynamodb
-          arn: !GetAtt PropertyTable.StreamArn
+          arn: !ImportValue '${self:custom.sstApp}-PropertiesStreamArn'
 
   getProperties:
     handler: functions/getProperties.main
@@ -39,56 +44,32 @@ functions:
   confirmUserSignup:
     handler: functions/confirmUserSignup.main
     environment:
-      USERS_TABLE: !Ref UsersTable
+      USERS_TABLE: !ImportValue '${self:custom.sstApp}-UsersTableName'
     iamRoleStatements:
       - Effect: Allow
         Action: dynamodb:PutItem
-        Resource: !GetAtt UsersTable.Arn
+        Resource: !ImportValue '${self:custom.sstApp}-UsersTableArn'
   
   updateUser:
     handler: functions/updateUser.main
     environment:
-      USERS_TABLE: !Ref UsersTable
+      USERS_TABLE: !ImportValue '${self:custom.sstApp}-UsersTableName'
     iamRoleStatements:
       - Effect: Allow
         Action: dynamodb:UpdateItem
-        Resource: !GetAtt UsersTable.Arn
+        Resource: !ImportValue '${self:custom.sstApp}-UsersTableArn'
 
   # loadPropertiesData:
   #   handler: scripts/loadPropertiesData.main
   #   environment:
-  #     USERS_TABLE: !Ref PropertiesTable
+  #     USERS_TABLE: !ImportValue '${self:custom.sstApp}-PropertiesTableName'
   #   iamRoleStatements:
   #     - Effect: Allow
   #       Action: dynamodb:UpdateItem
   #       Resource: !GetAtt PropertiesTable.Arn
 
 resources:
-  Resources:
-    PropertyTable:
-      Type: AWS::DynamoDB::Table
-      Properties:
-        BillingMode: PAY_PER_REQUEST
-        StreamSpecification:
-          StreamViewType: NEW_IMAGE
-        AttributeDefinitions:
-          - AttributeName: id
-            AttributeType: S
-        KeySchema:
-        - AttributeName: id
-          KeyType: HASH
-    
-    UsersTable:
-      Type: AWS::DynamoDB::Table
-      Properties: 
-        BillingMode: PAY_PER_REQUEST
-        AttributeDefinitions:
-          - AttributeName: id
-            AttributeType: S
-        KeySchema:
-          - AttributeName: id
-            KeyType: HASH
-        
+  Resources:        
     CognitoUserPool:
       Type: AWS::Cognito::UserPool
       Properties:
@@ -116,7 +97,7 @@ resources:
     CognitoDomain:
       Type: AWS::Cognito::UserPoolDomain
       Properties: 
-        Domain: eimovina-be
+        Domain: eimovina-be-jole
         UserPoolId: !Ref CognitoUserPool
 
     UserPoolInvokeConfirmUserSignupLambdaPermission:
