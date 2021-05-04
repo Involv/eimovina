@@ -1,6 +1,5 @@
 import DynamoDB from "aws-sdk/clients/dynamodb";
-import graphql from "graphql-tag";
-import { mutate } from "../libs/graphql";
+import { mutate } from "../libs/client";
 import { ulid } from "ulid";
 
 export const main = async (event) => {
@@ -13,7 +12,7 @@ export const main = async (event) => {
 };
 
 async function notifyPropertyUpdatedMutation(property) {
-  await mutate(graphql `mutation notifyPropertyUpdated(
+  await mutate(`mutation notifyPropertyUpdated(
     $id: ID!
     $userId: ID!
     $propertyId: ID!
@@ -28,7 +27,9 @@ async function notifyPropertyUpdatedMutation(property) {
       propertyId
       createdAt
     }
-  }`, {
+  }`,
+  'notifyPropertyUpdated',
+  {
     id: ulid(),
     userId: "29be4080-8ede-4b8d-8757-447cf26afc3a",
     propertyId: property.id,
