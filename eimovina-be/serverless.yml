@@ -10,7 +10,6 @@ package:
 
 plugins:
   - serverless-bundle # Package our functions with Webpack
-  - serverless-offline
   - serverless-appsync-plugin
   - serverless-iam-roles-per-function
 
@@ -52,6 +51,9 @@ functions:
         Action: dynamodb:PutItem
         Resource: !GetAtt UsersTable.Arn
 
+  sendCustomVerificationEmail:
+    handler: functions/sendCustomVerificationEmail.main
+
   updateUser:
     handler: functions/updateUser.main
     environment:
@@ -86,6 +88,33 @@ functions:
         Action: dynamodb:PutItem
         Resource: !GetAtt PropertyTable.Arn
 
+  notify:
+    handler: functions/notify.main
+    environment:
+      GRAPHQL_API_URL: !GetAtt EimovinabedevGraphQlApi.GraphQLUrl
+      PROPERTY_TABLE: !Ref PropertyTable
+      USERS_TABLE: !Ref UsersTable
+    events:
+      - stream:
+          type: dynamodb
+          arn: !GetAtt PropertyTable.StreamArn
+    iamRoleStatements:
+      - Effect: Allow
+        Action: appsync:GraphQL
+        Resource: !Sub ${EimovinabedevGraphQlApi.Arn}/*
+
+  notifyPropertyUpdated:
+    handler: functions/notifyPropertyUpdated.main
+    environment:
+      NOTIFICATIONS_TABLE: !Ref NotificationsTable
+    iamRoleStatements:
+      - Effect: Allow
+        Action: dynamodb:PutItem
+        Resource: !GetAtt NotificationsTable.Arn
+  
+  onNotified:
+    handler: functions/onNotified.main
+
 resources:
   Resources:
     PropertyTable:
@@ -93,7 +122,7 @@ resources:
       Properties:
         BillingMode: PAY_PER_REQUEST
         StreamSpecification:
-          StreamViewType: NEW_IMAGE
+          StreamViewType: NEW_AND_OLD_IMAGES
         AttributeDefinitions:
           - AttributeName: id
             AttributeType: S
@@ -122,11 +151,38 @@ resources:
           - Key: Name
             Value: user-table
 
+    NotificationsTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        BillingMode: PAY_PER_REQUEST
+        KeySchema:
+          - AttributeName: id
+            KeyType: HASH
+          - AttributeName: userId
+            KeyType: RANGE
+        AttributeDefinitions:
+          - AttributeName: id
+            AttributeType: S
+          - AttributeName: userId
+            AttributeType: S
+        GlobalSecondaryIndexes:
+          - IndexName: byUserId
+            KeySchema:
+              - AttributeName: userId
+                KeyType: HASH
+              - AttributeName: id
+                KeyType: RANGE
+            Projection:
+              ProjectionType: ALL
+        Tags:
+          - Key: Environment
+            Value: ${self:custom.stage}
+          - Key: Name
+            Value: notifications-table   
+
     CognitoUserPool:
       Type: AWS::Cognito::UserPool
       Properties:
-        VerificationMessageTemplate:
-          DefaultEmailOption: CONFIRM_WITH_LINK
         AutoVerifiedAttributes:
           - email
         Policies:
@@ -145,11 +201,12 @@ resources:
             Mutable: true
         LambdaConfig:
           PostConfirmation: !GetAtt ConfirmUserSignupLambdaFunction.Arn
+          CustomMessage: !GetAtt SendCustomVerificationEmailLambdaFunction.Arn
 
     CognitoDomain:
       Type: AWS::Cognito::UserPoolDomain
-      Properties:
-        Domain: eimovina-be
+      Properties: 
+        Domain: eimovina-be-miso
         UserPoolId: !Ref CognitoUserPool
 
     UserPoolInvokeConfirmUserSignupLambdaPermission:
@@ -157,6 +214,14 @@ resources:
       Properties:
         Action: lambda:invokeFunction
         FunctionName: !Ref ConfirmUserSignupLambdaFunction
+        Principal: cognito-idp.amazonaws.com
+        SourceArn: !GetAtt CognitoUserPool.Arn
+
+    SendCustomVerificationEmailLambdaPermission:
+      Type: AWS::Lambda::Permission
+      Properties:
+        Action: lambda:invokeFunction
+        FunctionName: !Ref SendCustomVerificationEmailLambdaFunction
         Principal: cognito-idp.amazonaws.com
         SourceArn: !GetAtt CognitoUserPool.Arn
 

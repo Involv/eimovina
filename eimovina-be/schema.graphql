@@ -1,17 +1,27 @@
+directive @aws_subscribe(mutations: [String!]!) on FIELD_DEFINITION
+
 schema {
   query: Query
   mutation: Mutation
+  subscription: Subscription
 }
 
 type Query {
   getProperties(search: String, limit: Int!, nextToken: String): PropertiesPage
-  @aws_api_key
-  @aws_cognito_user_pools
+    @aws_api_key
+    @aws_cognito_user_pools
 }
 
 type Mutation {
-  updateUser: User @aws_cognito_user_pools
-  updateFavoritePropertyId(propertyId: String): User @aws_cognito_user_pools
+  updateUser: User
+  updateFavoritePropertyId(propertyId: String): User
+  notifyPropertyUpdated(id: ID!, userId: ID!, propertyId: ID!): Notification!
+    @aws_iam
+}
+
+type Subscription {
+  onNotified(userId: ID!): Notification
+    @aws_subscribe(mutations: ["notifyPropertyUpdated"])
 }
 
 type PropertiesPage @aws_api_key @aws_cognito_user_pools {
@@ -20,6 +30,7 @@ type PropertiesPage @aws_api_key @aws_cognito_user_pools {
 }
 
 type Property @aws_api_key @aws_cognito_user_pools {
+  id: ID!
   realEstateListNumber: String!
   plotNumber: String!
   address: String
@@ -69,9 +80,17 @@ type Loan @aws_api_key @aws_cognito_user_pools {
   description: String!
 }
 
-type User @aws_api_key @aws_cognito_user_pools {
+type User {
+  id: ID!
   name: String!
   favoritePropertyIds: [String]
   createdAt: AWSDateTime!
   lastUpdatedAt: AWSDateTime
+}
+
+type Notification @aws_iam @aws_cognito_user_pools {
+  id: ID!
+  userId: ID!
+  propertyId: ID!
+  createdAt: AWSDateTime!
 }
