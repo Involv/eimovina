@@ -4,10 +4,12 @@ service: eimovina-be
 # Create an optimized package for our functions
 package:
   individually: true
+  exclude:
+    - package-lock.json
+    - package.json
 
 plugins:
   - serverless-bundle # Package our functions with Webpack
-  - serverless-offline
   - serverless-appsync-plugin
   - serverless-iam-roles-per-function
 
@@ -17,11 +19,15 @@ provider:
   stage: dev
   region: eu-central-1
   environment:
+    STAGE: ${self:custom.stage}
+    AWS_NODEJS_CONNECTION_REUSE_ENABLED: "1"
     ALGOLIA_APP_ID: ${ssm:eimovina-be-algolia-app-id}
     ALGOLIA_ADMIN_API_KEY: ${ssm:eimovina-be-algolia-admin-api-key}
     ALGOLIA_INDEX_NAME: eimovina-be-property-index
 
+
 custom:
+  stage: ${opt:stage, self:provider.stage}
   appSync:
     - ${file(appsync-api.yml)}
 
@@ -35,7 +41,7 @@ functions:
 
   getProperties:
     handler: functions/getProperties.main
-  
+
   confirmUserSignup:
     handler: functions/confirmUserSignup.main
     environment:
@@ -44,7 +50,10 @@ functions:
       - Effect: Allow
         Action: dynamodb:PutItem
         Resource: !GetAtt UsersTable.Arn
-  
+
+  sendCustomVerificationEmail:
+    handler: functions/sendCustomVerificationEmail.main
+
   updateUser:
     handler: functions/updateUser.main
     environment:
@@ -54,14 +63,57 @@ functions:
         Action: dynamodb:UpdateItem
         Resource: !GetAtt UsersTable.Arn
 
-  # loadPropertiesData:
-  #   handler: scripts/loadPropertiesData.main
-  #   environment:
-  #     USERS_TABLE: !Ref PropertiesTable
-  #   iamRoleStatements:
-  #     - Effect: Allow
-  #       Action: dynamodb:UpdateItem
-  #       Resource: !GetAtt PropertiesTable.Arn
+  updateFavoritePropertyId:
+    handler: functions/updateFavoritePropertyId.main
+    environment:
+      USERS_TABLE: !Ref UsersTable
+      PROPERTY_TABLE: !Ref PropertyTable
+    iamRoleStatements:
+      - Effect: Allow
+        Action:
+          - dynamodb:GetItem
+          - dynamodb:UpdateItem
+        Resource:
+          - !GetAtt UsersTable.Arn
+          - !GetAtt PropertyTable.Arn
+
+  loadPropertiesData:
+    handler: functions/loadPropertiesData.main
+    environment:
+      PROPERTIES_TABLE: !Ref PropertyTable
+    events:
+      - schedule: rate(1 day)
+    iamRoleStatements:
+      - Effect: Allow
+        Action: dynamodb:PutItem
+        Resource: !GetAtt PropertyTable.Arn
+
+  notify:
+    handler: functions/notify.main
+    environment:
+      GRAPHQL_API_URL: !GetAtt EimovinabedevGraphQlApi.GraphQLUrl
+      PROPERTY_TABLE: !Ref PropertyTable
+      USERS_TABLE: !Ref UsersTable
+    events:
+      - stream:
+          type: dynamodb
+          arn: !GetAtt PropertyTable.StreamArn
+    iamRoleStatements:
+      - Effect: Allow
+        Action: appsync:GraphQL
+        Resource: !Sub ${EimovinabedevGraphQlApi.Arn}/*
+
+  notifyPropertyUpdated:
+    handler: functions/notifyPropertyUpdated.main
+    environment:
+      NOTIFICATIONS_TABLE: !Ref NotificationsTable
+    iamRoleStatements:
+      - Effect: Allow
+        Action: dynamodb:PutItem
+        Resource: !GetAtt NotificationsTable.Arn
+  
+  onNotified:
+    handler: functions/onNotified.main
 
 resources:
   Resources:
@@ -70,17 +122,22 @@ resources:
       Properties:
         BillingMode: PAY_PER_REQUEST
         StreamSpecification:
-          StreamViewType: NEW_IMAGE
+          StreamViewType: NEW_AND_OLD_IMAGES
         AttributeDefinitions:
           - AttributeName: id
             AttributeType: S
         KeySchema:
         - AttributeName: id
           KeyType: HASH
-    
+        Tags:
+          - Key: Environment
+            Value: ${self:custom.stage}
+          - Key: Name
+            Value: property-table
+
     UsersTable:
       Type: AWS::DynamoDB::Table
-      Properties: 
+      Properties:
         BillingMode: PAY_PER_REQUEST
         AttributeDefinitions:
           - AttributeName: id
@@ -88,12 +145,44 @@ resources:
         KeySchema:
           - AttributeName: id
             KeyType: HASH
-        
+        Tags:
+          - Key: Environment
+            Value: ${self:custom.stage}
+          - Key: Name
+            Value: user-table
+
+    NotificationsTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        BillingMode: PAY_PER_REQUEST
+        KeySchema:
+          - AttributeName: id
+            KeyType: HASH
+          - AttributeName: userId
+            KeyType: RANGE
+        AttributeDefinitions:
+          - AttributeName: id
+            AttributeType: S
+          - AttributeName: userId
+            AttributeType: S
+        GlobalSecondaryIndexes:
+          - IndexName: byUserId
+            KeySchema:
+              - AttributeName: userId
+                KeyType: HASH
+              - AttributeName: id
+                KeyType: RANGE
+            Projection:
+              ProjectionType: ALL
+        Tags:
+          - Key: Environment
+            Value: ${self:custom.stage}
+          - Key: Name
+            Value: notifications-table   
+
     CognitoUserPool:
       Type: AWS::Cognito::UserPool
       Properties:
-        VerificationMessageTemplate:
-          DefaultEmailOption: CONFIRM_WITH_LINK
         AutoVerifiedAttributes:
           - email
         Policies:
@@ -112,11 +201,12 @@ resources:
             Mutable: true
         LambdaConfig:
           PostConfirmation: !GetAtt ConfirmUserSignupLambdaFunction.Arn
+          CustomMessage: !GetAtt SendCustomVerificationEmailLambdaFunction.Arn
 
     CognitoDomain:
       Type: AWS::Cognito::UserPoolDomain
       Properties: 
-        Domain: eimovina-be
+        Domain: eimovina-be-miso
         UserPoolId: !Ref CognitoUserPool
 
     UserPoolInvokeConfirmUserSignupLambdaPermission:
@@ -124,6 +214,14 @@ resources:
       Properties:
         Action: lambda:invokeFunction
         FunctionName: !Ref ConfirmUserSignupLambdaFunction
+        Principal: cognito-idp.amazonaws.com
+        SourceArn: !GetAtt CognitoUserPool.Arn
+
+    SendCustomVerificationEmailLambdaPermission:
+      Type: AWS::Lambda::Permission
+      Properties:
+        Action: lambda:invokeFunction
+        FunctionName: !Ref SendCustomVerificationEmailLambdaFunction
         Principal: cognito-idp.amazonaws.com
         SourceArn: !GetAtt CognitoUserPool.Arn
 
@@ -137,6 +235,3 @@ resources:
           - ALLOW_USER_PASSWORD_AUTH
           - ALLOW_REFRESH_TOKEN_AUTH
         PreventUserExistenceErrors: ENABLED
-
-
-  
