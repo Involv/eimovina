@@ -4,9 +4,11 @@
   "description": "A Node.js starter for Serverless Framework with ES6 and TypeScript support",
   "main": "handler.js",
   "scripts": {
-    "test": "serverless-bundle test"
+    "test": "serverless-bundle test",
+    "sls": "sls"
   },
   "author": "",
+  "type": "module",
   "license": "MIT",
   "repository": {
     "type": "git",
@@ -14,15 +16,23 @@
   },
   "devDependencies": {
     "aws-sdk": "^2.881.0",
+    "serverless": "2.4.0",
+    "serverless-appsync-plugin": "^1.9.0",
     "serverless-bundle": "3.2.0",
-    "serverless-offline": "^5.3.3"
+    "serverless-iam-roles-per-function": "^3.1.0"
   },
   "dependencies": {
+    "@react-native-community/netinfo": "^6.0.0",
     "algoliasearch": "^4.8.6",
-    "request": "^2.88.2",
-    "request-promise": "^4.2.6",
-    "serverless-appsync-plugin": "^1.9.0",
-    "serverless-iam-roles-per-function": "^3.1.0",
-    "uuid": "^7.0.3"
+    "aws-appsync": "^4.0.3",
+    "aws4": "^1.11.0",
+    "chance": "^1.1.7",
+    "deep-diff": "^1.0.2",
+    "graphql": "^15.5.0",
+    "graphql-tag": "^2.11.0",
+    "isomorphic-fetch": "^3.0.0",
+    "node-fetch": "^2.6.1",
+    "ulid": "^2.3.0",
+    "uuid": "^8.3.2"
   }
 }

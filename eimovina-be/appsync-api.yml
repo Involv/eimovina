@@ -1,29 +1,50 @@
 name: ${self:service}-${self:provider.stage}
 schema: schema.graphql
-authenticationType: API_KEY
+authenticationType: AMAZON_COGNITO_USER_POOLS
+userPoolConfig:
+  awsRegion: eu-central-1
+  defaultAction: ALLOW
+  userPoolId: !Ref CognitoUserPool
 additionalAuthenticationProviders:
-  - authenticationType: AMAZON_COGNITO_USER_POOLS
-    userPoolConfig:
-      awsRegion: eu-central-1
-      userPoolId: !Ref CognitoUserPool
+  - authenticationType: AWS_IAM
+  - authenticationType: API_KEY
 
 apiKeys:
   - name: test
     description: Testing key
 
 mappingTemplates:
+  - type: Subscription
+    field: onNotified
+    dataSource: onNotified
+    request: false
+    response: false
+    
   - type: Query
     field: getProperties
     dataSource: getProperties
     request: false
     response: false
+    
   - type: Mutation
     field: updateUser
     dataSource: updateUser
     request: false
     response: false
+  - type: Mutation
+    field: updateFavoritePropertyId
+    dataSource: updateFavoritePropertyId
+    request: false
+    response: false
+  - type: Mutation
+    field: notifyPropertyUpdated
+    dataSource: notifyPropertyUpdated
+    request: false
+    response: false
 
 dataSources:
+  - type: NONE
+    name: none
   - type: AWS_LAMBDA
     name: getProperties
     description: Lambda for listing properties
@@ -34,3 +55,18 @@ dataSources:
     description: Lambda for updating user
     config:
       functionName: updateUser
+  - type: AWS_LAMBDA
+    name: updateFavoritePropertyId
+    description: Lambda for updating user's favorite property id
+    config:
+      functionName: updateFavoritePropertyId
+  - type: AWS_LAMBDA
+    name: notifyPropertyUpdated
+    description: Lambda for property updated notify
+    config:
+      functionName: notifyPropertyUpdated
+  - type: AWS_LAMBDA
+    name: onNotified
+    description: Lambda for notifications
+    config:
+      functionName: onNotified
