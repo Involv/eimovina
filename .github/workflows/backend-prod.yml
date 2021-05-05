@@ -5,7 +5,7 @@ on:
     branches: [ main ]
     paths:
       - "eimovina-be/**"
-      - ".github/workflows/backend-dev.yml"
+      - ".github/workflows/backend-prod.yml"
 
 jobs:
   build:
