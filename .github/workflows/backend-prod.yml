@@ -1,8 +1,8 @@
-name: deploy dev
+name: deploy prod
 
 on:
   push:
-    branches: [ dev ]
+    branches: [ main ]
     paths:
       - "eimovina-be/**"
       - ".github/workflows/backend-dev.yml"
@@ -13,8 +13,8 @@ jobs:
     runs-on: ubuntu-latest
     
     env:
-      DEV_AWS_ACCESS_KEY_ID: ${{ secrets.DEV_AWS_ACCESS_KEY_ID }}
-      DEV_AWS_SECRET_ACCESS_KEY: ${{ secrets.DEV_AWS_SECRET_ACCESS_KEY }}
+      PROD_AWS_ACCESS_KEY_ID: ${{ secrets.PROD_AWS_ACCESS_KEY_ID }}
+      PROD_AWS_SECRET_ACCESS_KEY: ${{ secrets.PROD_AWS_SECRET_ACCESS_KEY }}
       AWS_DEFAULT_REGION: eu-central-1
 
     steps:
@@ -42,8 +42,8 @@ jobs:
     - name: deploy to dev
       working-directory: eimovina-be
       run: |
-        CREDS=`aws sts assume-role --role-arn arn:aws:iam::${{ secrets.DEV_ACCOUNT_ID }}:role/dev-ci-role --role-session-name=dev-ci-user`
-        export DEV_AWS_ACCESS_KEY_ID=`echo $CREDS | jq -r '.Credentials.AccessKeyId'`
-        export DEV_AWS_SECRET_ACCESS_KEY=`echo $CREDS | jq -r '.Credentials.SecretAccessKey'`
+        CREDS=`aws sts assume-role --role-arn arn:aws:iam::${{ secrets.PROD_ACCOUNT_ID }}:role/prod-ci-role --role-session-name=prod-ci-user`
+        export PROD_AWS_ACCESS_KEY_ID=`echo $CREDS | jq -r '.Credentials.AccessKeyId'`
+        export PROD_AWS_SECRET_ACCESS_KEY=`echo $CREDS | jq -r '.Credentials.SecretAccessKey'`
         export AWS_SESSION_TOKEN=`echo $CREDS | jq -r '.Credentials.SessionToken'`
         npm run sls -- deploy
