@@ -12,26 +12,31 @@ export const main = async (event) => {
 };
 
 async function notifyPropertyUpdatedMutation(property) {
-  await mutate(`mutation notifyPropertyUpdated(
-    $id: ID!
-    $userId: ID!
-    $propertyId: ID!
-  ) {
-    notifyPropertyUpdated(
-      id: $id
-      userId: $userId
-      propertyId: $propertyId
+  if (!property.favoriteBy?.length) return;
+  property.favoriteBy.forEach((userId) => console.log(`Notify user with id: ${userId}`));
+  await Promise.all(property.favoriteBy.map(async (userId) => {
+    console.log(`Notify user with id: ${userId}`);
+    await mutate(`mutation notifyPropertyUpdated(
+      $id: ID!
+      $userId: ID!
+      $propertyId: ID!
     ) {
-      id
-      userId
-      propertyId
-      createdAt
-    }
-  }`,
-  'notifyPropertyUpdated',
-  {
-    id: ulid(),
-    userId: "29be4080-8ede-4b8d-8757-447cf26afc3a",
-    propertyId: property.id,
-  });
+      notifyPropertyUpdated(
+        id: $id
+        userId: $userId
+        propertyId: $propertyId
+      ) {
+        id
+        userId
+        propertyId
+        createdAt
+      }
+    }`,
+    'notifyPropertyUpdated',
+    {
+      id: ulid(),
+      userId,
+      propertyId: property.id,
+    });
+  }));
 }
