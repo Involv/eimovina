@@ -27,11 +27,7 @@ provider:
 
 
 custom:
-  # Our stage is based on what is passed in when running serverless
-  # commands. Or falls back to what we have set in the provider section.
   stage: ${opt:stage, self:provider.stage}
-  # Name of the SST app that's deploying our infrastructure
-  sstApp: ${self:custom.stage}-eimovina-infra
   appSync:
     - ${file(appsync-api.yml)}
 
@@ -41,7 +37,7 @@ functions:
     events:
       - stream:
           type: dynamodb
-          arn: !ImportValue '${self:custom.sstApp}-PropertiesStreamArn'
+          arn: !GetAtt PropertyTable.StreamArn
 
   getProperties:
     handler: functions/getProperties.main
@@ -49,59 +45,59 @@ functions:
   confirmUserSignup:
     handler: functions/confirmUserSignup.main
     environment:
-      USERS_TABLE: !ImportValue '${self:custom.sstApp}-UsersTableName'
+      USERS_TABLE: !Ref UsersTable
     iamRoleStatements:
       - Effect: Allow
         Action: dynamodb:PutItem
-        Resource: !ImportValue '${self:custom.sstApp}-UsersTableArn'
-  
+        Resource: !GetAtt UsersTable.Arn
+
   sendCustomVerificationEmail:
     handler: functions/sendCustomVerificationEmail.main
 
   updateUser:
     handler: functions/updateUser.main
     environment:
-      USERS_TABLE: !ImportValue '${self:custom.sstApp}-UsersTableName'
+      USERS_TABLE: !Ref UsersTable
     iamRoleStatements:
       - Effect: Allow
         Action: dynamodb:UpdateItem
-        Resource: !ImportValue '${self:custom.sstApp}-UsersTableArn'
+        Resource: !GetAtt UsersTable.Arn
 
   updateFavoritePropertyId:
     handler: functions/updateFavoritePropertyId.main
     environment:
-      USERS_TABLE: !ImportValue '${self:custom.sstApp}-UsersTableName'
-      PROPERTY_TABLE: !ImportValue '${self:custom.sstApp}-PropertiesTableName'
+      USERS_TABLE: !Ref UsersTable
+      PROPERTY_TABLE: !Ref PropertyTable
     iamRoleStatements:
       - Effect: Allow
         Action:
           - dynamodb:GetItem
           - dynamodb:UpdateItem
         Resource:
-          - !ImportValue '${self:custom.sstApp}-UsersTableArn'
-          - !ImportValue '${self:custom.sstApp}-PropertiesTableArn'
+          - !GetAtt UsersTable.Arn
+          - !GetAtt PropertyTable.Arn
 
   loadPropertiesData:
     handler: functions/loadPropertiesData.main
     environment:
-      PROPERTIES_TABLE: !ImportValue '${self:custom.sstApp}-PropertiesTableName'
+      PROPERTIES_TABLE: !Ref PropertyTable
     events:
       - schedule: rate(1 day)
     iamRoleStatements:
       - Effect: Allow
         Action: dynamodb:PutItem
-        Resource: !ImportValue '${self:custom.sstApp}-PropertiesTableArn'
+        Resource: !GetAtt PropertyTable.Arn
 
   notify:
     handler: functions/notify.main
     environment:
       GRAPHQL_API_URL: !GetAtt EimovinabedevGraphQlApi.GraphQLUrl
-      PROPERTY_TABLE: !ImportValue '${self:custom.sstApp}-PropertiesTableName'
-      USERS_TABLE: !ImportValue '${self:custom.sstApp}-UsersTableName'
+      PROPERTY_TABLE: !Ref PropertyTable
+      USERS_TABLE: !Ref UsersTable
     events:
       - stream:
           type: dynamodb
-          arn: !ImportValue '${self:custom.sstApp}-PropertiesStreamArn'
+          arn: !GetAtt PropertyTable.StreamArn
     iamRoleStatements:
       - Effect: Allow
         Action: appsync:GraphQL
@@ -121,6 +117,40 @@ functions:
 
 resources:
   Resources:
+    PropertyTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        BillingMode: PAY_PER_REQUEST
+        StreamSpecification:
+          StreamViewType: NEW_AND_OLD_IMAGES
+        AttributeDefinitions:
+          - AttributeName: id
+            AttributeType: S
+        KeySchema:
+        - AttributeName: id
+          KeyType: HASH
+        Tags:
+          - Key: Environment
+            Value: ${self:custom.stage}
+          - Key: Name
+            Value: property-table
+
+    UsersTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        BillingMode: PAY_PER_REQUEST
+        AttributeDefinitions:
+          - AttributeName: id
+            AttributeType: S
+        KeySchema:
+          - AttributeName: id
+            KeyType: HASH
+        Tags:
+          - Key: Environment
+            Value: ${self:custom.stage}
+          - Key: Name
+            Value: user-table
+
     NotificationsTable:
       Type: AWS::DynamoDB::Table
       Properties:
@@ -176,7 +206,7 @@ resources:
     CognitoDomain:
       Type: AWS::Cognito::UserPoolDomain
       Properties: 
-        Domain: eimovina-be-jole
+        Domain: eimovina-be-miso
         UserPoolId: !Ref CognitoUserPool
 
     UserPoolInvokeConfirmUserSignupLambdaPermission:
