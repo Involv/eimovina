@@ -12,7 +12,7 @@ export const main = async (event) => {
 };
 
 async function notifyPropertyUpdatedMutation(property) {
-  if (!property.favoriteBy?.length) return;
+  if (!property.favoriteBy || !property.favoriteBy.length) return;
   property.favoriteBy.forEach((userId) => console.log(`Notify user with id: ${userId}`));
   await Promise.all(property.favoriteBy.map(async (userId) => {
     console.log(`Notify user with id: ${userId}`);

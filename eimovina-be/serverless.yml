@@ -3,7 +3,6 @@ service: eimovina-be
 
 # Create an optimized package for our functions
 package:
-  individually: true
   exclude:
     - package-lock.json
     - package.json
@@ -212,7 +211,7 @@ resources:
     CognitoDomain:
       Type: AWS::Cognito::UserPoolDomain
       Properties: 
-        Domain: eimovina-be-stefan
+        Domain: eimovina-be-miso
         UserPoolId: !Ref CognitoUserPool
 
     UserPoolInvokeConfirmUserSignupLambdaPermission:

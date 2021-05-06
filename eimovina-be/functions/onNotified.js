@@ -3,6 +3,6 @@ export const main = async (event, context) => {
   const currentUserId = event.identity.username;
   const { userId } = event.arguments;
   if (currentUserId !== userId) throw new Error("Unauthorized");
-  console.log(`User with id: ${currentUserId} succesfully subscribed.`)
+  console.log(`User with id: ${currentUserId} succesfully subscribed.`);
   return context.result;
 };
