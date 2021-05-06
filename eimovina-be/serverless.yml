@@ -12,6 +12,7 @@ plugins:
   - serverless-bundle # Package our functions with Webpack
   - serverless-appsync-plugin
   - serverless-iam-roles-per-function
+  - serverless-layers
 
 provider:
   name: aws
@@ -30,6 +31,9 @@ custom:
   stage: ${opt:stage, self:provider.stage}
   appSync:
     - ${file(appsync-api.yml)}
+  
+  serverless-layers:
+    layersDeploymentBucket: ${ssm:/eimovina-be/${self:custom.stage}/layer-deployment-bucket}
 
 functions:
   syncPropertyAlgolia:

@@ -19,7 +19,8 @@
     "serverless": "2.4.0",
     "serverless-appsync-plugin": "^1.9.0",
     "serverless-bundle": "3.2.0",
-    "serverless-iam-roles-per-function": "^3.1.0"
+    "serverless-iam-roles-per-function": "^3.1.0",
+    "serverless-layers": "^2.3.3"
   },
   "dependencies": {
     "algoliasearch": "^4.8.6",
