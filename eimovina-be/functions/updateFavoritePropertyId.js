@@ -73,7 +73,7 @@ const updatePropertyFavoriteBy = async (propertyId, newFavoriteBy) => {
 };
 
 const configureFavoritePropertyIdsArray = (propertyId, favoritePropertyIds) => {
-  const newFavoritePropertyIds = !favoritePropertyIds ? [propertyId] : [...favoritePropertyIds];
+  const newFavoritePropertyIds = !favoritePropertyIds ? [] : [...favoritePropertyIds];
 
   console.log("passed propertyId: ", propertyId);
   console.log("BEFORE favoritePropertyIds: ", newFavoritePropertyIds);
@@ -91,7 +91,7 @@ const configureFavoritePropertyIdsArray = (propertyId, favoritePropertyIds) => {
 };
 
 const configureFavoriteByArray = (userId, favoriteBy, isPropertyFavorite) => {
-  const newFavoriteBy = !favoriteBy ? [userId] : [...favoriteBy];
+  const newFavoriteBy = !favoriteBy ? [] : [...favoriteBy];
 
   if (isPropertyFavorite) {
     newFavoriteBy.push(userId);
