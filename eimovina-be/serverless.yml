@@ -42,6 +42,15 @@ functions:
   getProperties:
     handler: functions/getProperties.main
 
+  getProperty:
+    handler: functions/getProperty.main
+    environment:
+      PROPERTY_TABLE: !Ref PropertyTable
+    iamRoleStatements:
+      - Effect: Allow
+        Action: dynamodb:GetItem
+        Resource: !GetAtt PropertyTable.Arn
+
   confirmUserSignup:
     handler: functions/confirmUserSignup.main
     environment:
@@ -206,7 +215,7 @@ resources:
     CognitoDomain:
       Type: AWS::Cognito::UserPoolDomain
       Properties: 
-        Domain: eimovina-be-stefan
+        Domain: eimovina-be-miso
         UserPoolId: !Ref CognitoUserPool
 
     UserPoolInvokeConfirmUserSignupLambdaPermission:
