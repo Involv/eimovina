@@ -63,8 +63,8 @@ const mapProperties = data => {
   const municipalityId = list.poid || "";
   const submunicipalityId = list.koid || "";
   const realEstateListNumber = list.broj_lista || "";
-  const id = `${municipalityId}/` +
-  `${submunicipalityId}/` +
+  const id = `${municipalityId}-` +
+  `${submunicipalityId}-` +
   `${realEstateListNumber}`;
 
   const params = {
