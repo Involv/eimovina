@@ -25,7 +25,6 @@ provider:
     ALGOLIA_ADMIN_API_KEY: ${ssm:eimovina-be-algolia-admin-api-key}
     ALGOLIA_INDEX_NAME: eimovina-be-property-index
 
-
 custom:
   stage: ${opt:stage, self:provider.stage}
   appSync:
@@ -50,7 +49,7 @@ functions:
       - Effect: Allow
         Action: dynamodb:GetItem
         Resource: !GetAtt PropertyTable.Arn
-  
+
   getUserFavoriteProperties:
     handler: functions/getUserFavoriteProperties.main
     environment:
@@ -58,10 +57,10 @@ functions:
       USERS_TABLE: !Ref UsersTable
     iamRoleStatements:
       - Effect: Allow
-        Action: 
+        Action:
           - dynamodb:BatchGetItem
           - dynamodb:GetItem
-        Resource: 
+        Resource:
           - !GetAtt PropertyTable.Arn
           - !GetAtt UsersTable.Arn
 
@@ -134,7 +133,7 @@ functions:
       - Effect: Allow
         Action: dynamodb:PutItem
         Resource: !GetAtt NotificationsTable.Arn
-  
+
   onNotified:
     handler: functions/onNotified.main
 
@@ -150,8 +149,8 @@ resources:
           - AttributeName: id
             AttributeType: S
         KeySchema:
-        - AttributeName: id
-          KeyType: HASH
+          - AttributeName: id
+            KeyType: HASH
         Tags:
           - Key: Environment
             Value: ${self:custom.stage}
@@ -201,7 +200,7 @@ resources:
           - Key: Environment
             Value: ${self:custom.stage}
           - Key: Name
-            Value: notifications-table   
+            Value: notifications-table
 
     CognitoUserPool:
       Type: AWS::Cognito::UserPool
@@ -228,7 +227,7 @@ resources:
 
     CognitoDomain:
       Type: AWS::Cognito::UserPoolDomain
-      Properties: 
+      Properties:
         Domain: eimovina-be
         UserPoolId: !Ref CognitoUserPool
 
