@@ -17,7 +17,7 @@ export const main = handler(async (event) => {
 
     console.log("Params: ", params);
 
-    res = await dynamoDb.batchGet(params);
+    const res = await dynamoDb.batchGet(params);
     result = res.Responses[process.env.PROPERTY_TABLE]
   }
   console.log("User Favorite Properties result: ", JSON.stringify(result, null, 4));
