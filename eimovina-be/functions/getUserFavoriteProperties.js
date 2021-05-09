@@ -4,7 +4,7 @@ import dynamoDb from "../libs/dynamodb-lib";
 export const main = handler(async (event) => {
   console.log("EVENT: ", {event});
 
-  const propertyIds = await getUsersFavoritePropertyIds(event.identity.username);
+  const propertyIds = await getUserFavoritePropertyIds(event.identity.username);
   const ids = constructIdKeys(propertyIds);
   console.log("Property IDS: ", ids);
 
@@ -20,7 +20,7 @@ export const main = handler(async (event) => {
   return result.Responses[process.env.PROPERTY_TABLE];
 });
 
-const getUsersFavoritePropertyIds = async (userId) => {
+const getUserFavoritePropertyIds = async (userId) => {
   console.log("USER ID: ", userId);
   const params = {
     TableName: process.env.USERS_TABLE,

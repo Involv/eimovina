@@ -11,7 +11,7 @@ type Query {
     @aws_api_key
     @aws_cognito_user_pools
   getProperty(id: ID!): Property @aws_api_key @aws_cognito_user_pools
-  getUsersFavoriteProperties: [Property!]
+  getUserFavoriteProperties: [Property!]
 }
 
 type Mutation {

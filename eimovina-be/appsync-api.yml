@@ -31,8 +31,8 @@ mappingTemplates:
     request: false
     response: false
   - type: Query
-    field: getUsersFavoriteProperties
-    dataSource: getUsersFavoriteProperties
+    field: getUserFavoriteProperties
+    dataSource: getUserFavoriteProperties
     request: false
     response: false
     
@@ -66,10 +66,10 @@ dataSources:
     config:
       functionName: getProperty
   - type: AWS_LAMBDA
-    name: getUsersFavoriteProperties
-    description: Lambda to get users favorite properties
+    name: getUserFavoriteProperties
+    description: Lambda to get user's favorite properties
     config:
-      functionName: getUsersFavoriteProperties
+      functionName: getUserFavoriteProperties
   - type: AWS_LAMBDA
     name: updateUser
     description: Lambda for updating user

@@ -51,8 +51,8 @@ functions:
         Action: dynamodb:GetItem
         Resource: !GetAtt PropertyTable.Arn
   
-  getUsersFavoriteProperties:
-    handler: functions/getUsersFavoriteProperties.main
+  getUserFavoriteProperties:
+    handler: functions/getUserFavoriteProperties.main
     environment:
       PROPERTY_TABLE: !Ref PropertyTable
       USERS_TABLE: !Ref UsersTable
