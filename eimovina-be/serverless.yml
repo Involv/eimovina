@@ -229,7 +229,7 @@ resources:
     CognitoDomain:
       Type: AWS::Cognito::UserPoolDomain
       Properties: 
-        Domain: eimovina-be-miso
+        Domain: eimovina-be
         UserPoolId: !Ref CognitoUserPool
 
     UserPoolInvokeConfirmUserSignupLambdaPermission:
