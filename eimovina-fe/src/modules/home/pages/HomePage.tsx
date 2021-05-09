@@ -8,14 +8,17 @@ import { AuthorizationContext } from "../../authentification/components/Authoriz
 import { LocalStorageKeys } from "../../authentification/enums/local-storage-keysenum.";
 
 const FETCH_PROPERTIES_QUERY = gql`
-  query MyQuery($search: String!) {
-    getProperties(search: $search) {
-      realEstateListNumber
-      plotNumber
-      objects {
-        area
-        roomCount
-        usagePurpose
+  query MyQuery($limit: Int!, $search: String!) {
+    getProperties(limit: $limit, search: $search) {
+      properties {
+        id
+        realEstateListNumber
+        plotNumber
+        objects {
+          area
+          roomCount
+          usagePurpose
+        }
       }
     }
   }
@@ -31,12 +34,16 @@ const UPDATE_USER = gql`
 
 export const HomePage = () => {
   const [
-    getProperties,
-    { data: { getProperties: properties = null } = {}, loading, error },
-  ] = useLazyQuery<PropertiesResponse, { search: string }>(
+    fetchProperties,
+    {
+      data: { getProperties: { properties = null } = {} } = {},
+      loading,
+      error,
+    },
+  ] = useLazyQuery<PropertiesResponse, { search: string; limit: number }>(
     FETCH_PROPERTIES_QUERY,
     {
-      variables: { search: "1000" },
+      variables: { search: "", limit: 10 },
     }
   );
 
@@ -49,7 +56,7 @@ export const HomePage = () => {
   );
 
   const onSearchSubmit = (searchTerm: string) => {
-    getProperties({ variables: { search: searchTerm } });
+    fetchProperties({ variables: { search: searchTerm, limit: 10 } });
     setIsSearchTriggered(true);
   };
 
