@@ -30,6 +30,11 @@ mappingTemplates:
     dataSource: getProperty
     request: false
     response: false
+  - type: Query
+    field: getUsersFavoriteProperties
+    dataSource: getUsersFavoriteProperties
+    request: false
+    response: false
     
   - type: Mutation
     field: updateUser
@@ -60,6 +65,11 @@ dataSources:
     description: Lambda to get property by ID
     config:
       functionName: getProperty
+  - type: AWS_LAMBDA
+    name: getUsersFavoriteProperties
+    description: Lambda to get users favorite properties
+    config:
+      functionName: getUsersFavoriteProperties
   - type: AWS_LAMBDA
     name: updateUser
     description: Lambda for updating user

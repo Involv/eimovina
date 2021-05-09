@@ -50,6 +50,20 @@ functions:
       - Effect: Allow
         Action: dynamodb:GetItem
         Resource: !GetAtt PropertyTable.Arn
+  
+  getUsersFavoriteProperties:
+    handler: functions/getUsersFavoriteProperties.main
+    environment:
+      PROPERTY_TABLE: !Ref PropertyTable
+      USERS_TABLE: !Ref UsersTable
+    iamRoleStatements:
+      - Effect: Allow
+        Action: 
+          - dynamodb:BatchGetItem
+          - dynamodb:GetItem
+        Resource: 
+          - !GetAtt PropertyTable.Arn
+          - !GetAtt UsersTable.Arn
 
   confirmUserSignup:
     handler: functions/confirmUserSignup.main
