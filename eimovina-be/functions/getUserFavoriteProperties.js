@@ -8,16 +8,20 @@ export const main = handler(async (event) => {
   const ids = constructIdKeys(propertyIds);
   console.log("Property IDS: ", ids);
 
-  let params = {RequestItems: {}};
-  params.RequestItems[process.env.PROPERTY_TABLE] = {
-    Keys: ids,
-  };
+  let result = [];
+  if (ids && ids.length > 0) {
+    let params = {RequestItems: {}};
+    params.RequestItems[process.env.PROPERTY_TABLE] = {
+      Keys: ids,
+    };
 
-  console.log("Params: ", params);
+    console.log("Params: ", params);
 
-  const result = await dynamoDb.batchGet(params);
+    const res = await dynamoDb.batchGet(params);
+    result = res.Responses[process.env.PROPERTY_TABLE];
+  }
   console.log("User Favorite Properties result: ", JSON.stringify(result, null, 4));
-  return result.Responses[process.env.PROPERTY_TABLE];
+  return result;
 });
 
 const getUserFavoritePropertyIds = async (userId) => {
