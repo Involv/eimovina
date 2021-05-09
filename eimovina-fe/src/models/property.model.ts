@@ -4,4 +4,5 @@ export interface Property {
   realEstateListNumber: string;
   plotNumber: string;
   objects: Object[];
+  address: string;
 }
