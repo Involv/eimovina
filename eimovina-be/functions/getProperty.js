@@ -9,7 +9,13 @@ export const main = handler(async (event) => {
    },
   };
 
-  const result = await dynamoDb.get(params);
+  const propertyItem = await dynamoDb.get(params);
+  const result = propertyItem.Item;
 
-  return result.Item;
+  const userId = event.identity ? event.identity.username : "";
+  if (userId) {
+    result.isFavorite = result.favoriteBy ? result.favoriteBy.includes(userId) : false;
+  }
+
+  return result;
 });
