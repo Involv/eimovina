@@ -25,7 +25,6 @@ provider:
     ALGOLIA_ADMIN_API_KEY: ${ssm:eimovina-be-algolia-admin-api-key}
     ALGOLIA_INDEX_NAME: eimovina-be-property-index
 
-
 custom:
   stage: ${opt:stage, self:provider.stage}
   appSync:
@@ -41,6 +40,29 @@ functions:
 
   getProperties:
     handler: functions/getProperties.main
+
+  getProperty:
+    handler: functions/getProperty.main
+    environment:
+      PROPERTY_TABLE: !Ref PropertyTable
+    iamRoleStatements:
+      - Effect: Allow
+        Action: dynamodb:GetItem
+        Resource: !GetAtt PropertyTable.Arn
+
+  getUserFavoriteProperties:
+    handler: functions/getUserFavoriteProperties.main
+    environment:
+      PROPERTY_TABLE: !Ref PropertyTable
+      USERS_TABLE: !Ref UsersTable
+    iamRoleStatements:
+      - Effect: Allow
+        Action:
+          - dynamodb:BatchGetItem
+          - dynamodb:GetItem
+        Resource:
+          - !GetAtt PropertyTable.Arn
+          - !GetAtt UsersTable.Arn
 
   confirmUserSignup:
     handler: functions/confirmUserSignup.main
@@ -111,7 +133,7 @@ functions:
       - Effect: Allow
         Action: dynamodb:PutItem
         Resource: !GetAtt NotificationsTable.Arn
-  
+
   onNotified:
     handler: functions/onNotified.main
 
@@ -127,8 +149,8 @@ resources:
           - AttributeName: id
             AttributeType: S
         KeySchema:
-        - AttributeName: id
-          KeyType: HASH
+          - AttributeName: id
+            KeyType: HASH
         Tags:
           - Key: Environment
             Value: ${self:custom.stage}
@@ -178,7 +200,7 @@ resources:
           - Key: Environment
             Value: ${self:custom.stage}
           - Key: Name
-            Value: notifications-table   
+            Value: notifications-table
 
     CognitoUserPool:
       Type: AWS::Cognito::UserPool
@@ -205,8 +227,8 @@ resources:
 
     CognitoDomain:
       Type: AWS::Cognito::UserPoolDomain
-      Properties: 
-        Domain: eimovina-be-stefan
+      Properties:
+        Domain: eimovina-be-${self:custom.stage}
         UserPoolId: !Ref CognitoUserPool
 
     UserPoolInvokeConfirmUserSignupLambdaPermission:

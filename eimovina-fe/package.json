@@ -23,6 +23,7 @@
     "react-router": "^5.2.0",
     "react-router-dom": "^5.2.0",
     "react-scripts": "4.0.3",
+    "react-toast-notifications": "^2.4.4",
     "tailwindcss": "^2.1.1",
     "typescript": "^4.2.4",
     "web-vitals": "^1.1.1"
@@ -35,8 +36,8 @@
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
-    "provision": "aws cloudformation deploy --template-file ./cloudformation.yml --stack-name hosting-bucket --parameter-overrides BucketName=eimovina-fe",
-    "upload": "aws s3 sync build/ s3://eimovina-fe --delete",
+    "provision": "aws cloudformation deploy --template-file ./cloudformation.yml --stack-name hosting-bucket --parameter-overrides BucketName=eimovina-fe-anja",
+    "upload": "aws s3 sync build/ s3://eimovina-fe-anja --delete",
     "deploy": "npm run build && npm run upload"
   },
   "eslintConfig": {
