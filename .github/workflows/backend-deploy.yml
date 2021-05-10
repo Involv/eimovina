@@ -1,11 +1,11 @@
-name: deploy dev
+name: deploy backend
 
 on:
   push:
     branches: [ dev ]
     paths:
       - "eimovina-be/**"
-      - ".github/workflows/backend-dev.yml"
+      - ".github/workflows/backend-deploy.yml"
 
 jobs:
   build:

@@ -20,7 +20,7 @@ export const SearchBar: FC<SearchBarProps> = ({ onSearchSubmit }) => {
         disabled={!searchTerm}
         onClick={() => onSearchSubmit(searchTerm)}
       >
-        <p className="font-semibold text-s text-uppercase">Pretraži</p>
+        <p className="font-semibold text-s text-uppercase">Opa</p>
       </button>
     </div>
   );
