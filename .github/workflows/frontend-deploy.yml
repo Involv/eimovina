@@ -13,6 +13,10 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
+    - uses: actions/setup-node@v1
+      with:
+        node-version: '12'
+
     - name: Configure DEV AWS Credentials
       if: github.ref == 'refs/heads/dev'
       uses: aws-actions/configure-aws-credentials@v1
@@ -23,9 +27,11 @@ jobs:
         role-to-assume: arn:aws:iam::${{ secrets.DEV_ACCOUNT_ID }}:role/dev-ci-role
         role-duration-seconds: 1200
         role-session-name: dev_ci_user
+
     - name: Build React App
       working-directory: eimovina-fe
       run: npm install && npm run build
+
     - name: Deploy app build to S3 bucket
       if: github.ref == 'refs/heads/dev'
       run: aws s3 sync eimovina-fe/build/ s3://${{ secrets.DEV_BUCKET_NAME }} --delete
