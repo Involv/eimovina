@@ -1,5 +1,6 @@
 import React, { useContext, useState } from "react";
 import { Link, useHistory } from "react-router-dom";
+import { useToasts } from "react-toast-notifications";
 import { AuthorizationContext } from "../components/Authorization";
 
 export const Login = () => {
@@ -8,6 +9,8 @@ export const Login = () => {
 
   const { authenticate } = useContext(AuthorizationContext);
   const history = useHistory();
+
+  const { addToast } = useToasts();
 
   const hanldeSumbit = (event: React.FormEvent) => {
     event.preventDefault();
@@ -19,6 +22,12 @@ export const Login = () => {
       })
       .catch((err) => {
         console.log("Error on Log In: ", err);
+        addToast(err.message, {
+          appearance: "error",
+          autoDismiss: true,
+          autoDismissTimeout: 3000,
+          placement: "bottom-center",
+        });
       });
   };
 

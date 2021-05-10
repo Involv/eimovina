@@ -9,7 +9,7 @@ export const Nav = () => {
     <div className="bg-gray-700 p-6 flex justify-between items-center">
       <span className="font-light text-2xl mb-2 text-white">E-Imovina</span>
       {!user ? (
-        <Link className="text-blue-300 font-bold cursor-pointer" to="login">
+        <Link className="text-blue-300 font-bold cursor-pointer" to="/login">
           ULOGUJ SE
         </Link>
       ) : (

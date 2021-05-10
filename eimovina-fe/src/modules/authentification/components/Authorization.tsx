@@ -9,6 +9,8 @@ import { LocalStorageKeys } from "../enums/local-storage-keysenum.";
 
 interface AuthorizationContextProps {
   authenticate: (Username: string, Password: string) => Promise<unknown>;
+  confirmRegistration: (Username: string, code: string) => Promise<unknown>;
+  resendConfirmationCode: (Username: string) => Promise<unknown>;
   getSession: () => Promise<unknown>;
   logout: () => void;
   user: CognitoUser | null;
@@ -73,6 +75,44 @@ const Authorization: FC = ({ children }) => {
       });
     });
 
+  const confirmRegistration = async (Username: string, code: string) =>
+    await new Promise((resolve, reject) => {
+      console.log({ Username });
+      const user = new CognitoUser({
+        Username,
+        Pool: UserPool,
+      });
+
+      console.log("dodje li odje");
+
+      user.confirmRegistration(code, true, (err, result) => {
+        if (err) {
+          console.log({ err });
+          reject(err);
+        }
+
+        console.log({ result });
+
+        resolve(result);
+      });
+    });
+
+  const resendConfirmationCode = async (Username: string) =>
+    await new Promise((resolve, reject) => {
+      const user = new CognitoUser({
+        Username,
+        Pool: UserPool,
+      });
+
+      user.resendConfirmationCode((err, result) => {
+        if (err) {
+          reject(err);
+        }
+
+        resolve(result);
+      });
+    });
+
   const logout = () => {
     const user = UserPool.getCurrentUser();
     if (user) {
@@ -85,6 +125,8 @@ const Authorization: FC = ({ children }) => {
     <AuthorizationContext.Provider
       value={{
         authenticate,
+        confirmRegistration,
+        resendConfirmationCode,
         getSession,
         logout,
         user,
