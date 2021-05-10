@@ -11,11 +11,15 @@ jobs:
   build:
     runs-on: ubuntu-latest
 
+    strategy:
+      matrix:
+        node-version: [12.x, 14.x]
+
     steps:
     - uses: actions/checkout@v2
     - uses: actions/setup-node@v1
       with:
-        node-version: '12'
+        node-version: ${{ matrix.node-version }}
 
     - name: Configure DEV AWS Credentials
       if: github.ref == 'refs/heads/dev'
@@ -30,7 +34,7 @@ jobs:
 
     - name: Build React App
       working-directory: eimovina-fe
-      run: npm install && npm run build
+      run: npm ci && npm run build
 
     - name: Deploy app build to S3 bucket
       if: github.ref == 'refs/heads/dev'
