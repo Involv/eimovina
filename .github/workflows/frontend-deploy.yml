@@ -24,6 +24,7 @@ jobs:
         role-duration-seconds: 1200
         role-session-name: dev_ci_user
     - name: Build React App
+      working-directory: eimovina-fe
       run: npm install && npm run build
     - name: Deploy app build to S3 bucket
       if: github.ref == 'refs/heads/dev'
