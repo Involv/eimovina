@@ -48,6 +48,7 @@ jobs:
     - name: Configure AWS PROD Credentials
       if: github.ref == 'refs/heads/main'
       working-directory: eimovina-be
+      uses: aws-actions/configure-aws-credentials@v1
       with:
         aws-access-key-id: ${{ secrets.PROD_AWS_ACCESS_KEY_ID }}
         aws-secret-access-key: ${{ secrets.PROD_AWS_SECRET_ACCESS_KEY }}

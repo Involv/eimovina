@@ -30,7 +30,6 @@ jobs:
         role-to-assume: arn:aws:iam::${{ secrets.DEV_ACCOUNT_ID }}:role/dev-ci-role
         role-duration-seconds: 1200
         role-session-name: dev_ci_user
-      run: aws s3 sync eimovina-fe/build/ s3://${{ secrets.DEV_BUCKET_NAME }} --delete
 
     - name: Configure PROD AWS Credentials
       if: github.ref == 'refs/heads/main'
@@ -46,7 +45,7 @@ jobs:
     - name: deploy to dev 
       if: github.ref == 'refs/heads/dev'
       run: aws s3 sync eimovina-fe/build/ s3://${{ secrets.DEV_BUCKET_NAME }} --delete
-      
+
     - name: deploy to prod 
       if: github.ref == 'refs/heads/main'
       run: aws s3 sync eimovina-fe/build/ s3://${{ secrets.PROD_BUCKET_NAME }} --delete
