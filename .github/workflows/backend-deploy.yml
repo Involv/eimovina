@@ -33,7 +33,7 @@ jobs:
         rm awscliv2.zip
         rm -r ./aws
 
-    - name: deploy to dev
+    - name: Configure AWS DEV Credentials
       if: github.ref == 'refs/heads/dev'
       working-directory: eimovina-be
       uses: aws-actions/configure-aws-credentials@v1
@@ -44,9 +44,8 @@ jobs:
         role-to-assume: arn:aws:iam::${{ secrets.DEV_ACCOUNT_ID }}:role/dev-ci-role
         role-duration-seconds: 1200
         role-session-name: dev_ci_user
-      run: npm run sls -- deploy -s dev
 
-    - name: deploy to prod
+    - name: Configure AWS PROD Credentials
       if: github.ref == 'refs/heads/main'
       working-directory: eimovina-be
       with:
@@ -56,4 +55,11 @@ jobs:
         role-to-assume: arn:aws:iam::${{ secrets.PROD_ACCOUNT_ID }}:role/prod-ci-role
         role-duration-seconds: 1200
         role-session-name: prod_ci_user
+
+    - name: deploy to dev
+      if: github.ref == 'refs/heads/dev'
+      run: npm run sls -- deploy -s dev
+    
+    - name: deploy to prod
+      if: github.ref == 'refs/heads/main'
       run: npm run sls -- deploy -s prod
