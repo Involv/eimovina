@@ -23,7 +23,7 @@ jobs:
 
     - name: yarn build
       working-directory: eimovina-fe
-      run: yarn build
+      run: yarn run build
 
     - name: Configure DEV AWS Credentials
       if: github.ref == 'refs/heads/dev'
