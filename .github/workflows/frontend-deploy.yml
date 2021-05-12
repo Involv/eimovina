@@ -17,11 +17,13 @@ jobs:
       with:
         node-version: '12'
 
-    - name: npm install and build
+    - name: yarn install
       working-directory: eimovina-fe
-      run: |
-        npm install
-        npm run build --if-present
+      run: yarn install
+
+    - name: yarn build
+      working-directory: eimovina-fe
+      run: yarn build
 
     - name: Configure DEV AWS Credentials
       if: github.ref == 'refs/heads/dev'
