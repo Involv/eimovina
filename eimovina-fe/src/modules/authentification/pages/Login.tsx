@@ -35,7 +35,7 @@ export const Login = () => {
     <div className="h-full flex items-center justify-center">
       <form
         onSubmit={hanldeSumbit}
-        className="max-w-md rounded overflow-hidden shadow-lg p-6"
+        className="max-w-md rounded overflow-hidden shadow-lg p-6 bg-white"
       >
         <div className="text-3xl font-light tracking-wide text-center">
           EImovina Log In

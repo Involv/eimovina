@@ -8,11 +8,13 @@ import {
   InMemoryCache,
   HttpLink,
   concat,
+  from,
   ApolloLink,
 } from "@apollo/client";
 import { ApolloProvider } from "@apollo/client/react";
 import AwsSyncConfig from "./aws/aws-export";
 import { LocalStorageKeys } from "./modules/authentification/enums/local-storage-keysenum.";
+import { onError } from "@apollo/client/link/error";
 
 const httpLink = new HttpLink({
   uri: AwsSyncConfig.aws_appsync_graphqlEndpoint,
@@ -32,9 +34,28 @@ const authMiddleware = new ApolloLink((operation: any, forward: any) => {
   return forward(operation);
 });
 
+// Log any GraphQL errors or network error that occurred
+const errorLink = onError(
+  ({ graphQLErrors, networkError, operation, forward }) => {
+    console.log({ graphQLErrors });
+    console.log({ networkError });
+    if (graphQLErrors)
+      graphQLErrors.map(({ message, locations, path }) =>
+        console.log(
+          `[GraphQL error]: Message: ${message}, Location: ${locations}, Path: ${path}`
+        )
+      );
+    if (networkError) {
+      console.log(`[Network error]: ${networkError}`);
+    }
+    return forward(operation);
+  }
+);
+
 const client = new ApolloClient({
   cache: new InMemoryCache(),
-  link: concat(authMiddleware, httpLink),
+  // link: concat(authMiddleware, httpLink),
+  link: from([errorLink, authMiddleware, httpLink]),
 });
 
 ReactDOM.render(

@@ -15,9 +15,8 @@ export const Registration = () => {
 
   const { addToast } = useToasts();
 
-  const { confirmRegistration, resendConfirmationCode } = useContext(
-    AuthorizationContext
-  );
+  const { confirmRegistration, resendConfirmationCode } =
+    useContext(AuthorizationContext);
 
   const attributeName = new CognitoUserAttribute({ Name: "name", Value: name });
 
@@ -84,7 +83,7 @@ export const Registration = () => {
 
   return (
     <div className="h-full flex items-center justify-center column flex-col	">
-      <div className="max-w-md rounded overflow-hidden shadow-lg p-6">
+      <div className="max-w-md rounded overflow-hidden shadow-lg p-6 bg-white">
         <div className="text-3xl font-light tracking-wide text-center">
           EImovina Registration
         </div>

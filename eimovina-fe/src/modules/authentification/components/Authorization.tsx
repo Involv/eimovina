@@ -23,8 +23,32 @@ const AuthorizationContext = createContext<AuthorizationContextProps>(
 const Authorization: FC = ({ children }) => {
   const [user, setUser] = useState<CognitoUser | null>(null);
 
+  const getUser = (): CognitoUser | null => {
+    const user = UserPool.getCurrentUser();
+    user?.getSession((err: Error | null, data: CognitoUserSession | null) => {
+      console.log({ data });
+      if (err) {
+        // Prompt the user to reauthenticate by hand...
+      } else {
+        const cognitoUserSession = data;
+        const accessToken = cognitoUserSession?.getAccessToken()?.getJwtToken();
+        if (accessToken) {
+          localStorage.setItem(
+            LocalStorageKeys.eimovinaAccessToken,
+            accessToken
+          );
+        }
+      }
+    });
+    if (user) {
+      return user;
+    }
+    return null;
+  };
+
   useEffect(() => {
-    getSession().then(() => setUser(UserPool.getCurrentUser()));
+    // getSession().then(() => setUser(UserPool.getCurrentUser()));
+    setUser(UserPool.getCurrentUser());
   }, []);
 
   const getSession = async () =>
@@ -36,6 +60,7 @@ const Authorization: FC = ({ children }) => {
             if (err) {
               reject();
             } else {
+              console.log({ session });
               resolve(session);
             }
           }
@@ -129,7 +154,7 @@ const Authorization: FC = ({ children }) => {
         resendConfirmationCode,
         getSession,
         logout,
-        user,
+        user: getUser(),
       }}
     >
       {children}

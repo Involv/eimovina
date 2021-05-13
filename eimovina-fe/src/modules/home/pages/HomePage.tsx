@@ -8,6 +8,7 @@ import { AuthorizationContext } from "../../authentification/components/Authoriz
 import { LocalStorageKeys } from "../../authentification/enums/local-storage-keysenum.";
 import { Link } from "react-router-dom";
 import { FavoritePropertiesResponse } from "../../../models/favorite-properties.response";
+import { EmptyAsset, EmptyAssetTypes } from "../../../components/EmptyAsset";
 
 const FETCH_PROPERTIES_QUERY = gql`
   query MyQuery($limit: Int!, $search: String!) {
@@ -74,9 +75,8 @@ export const HomePage = () => {
 
   const [updateUser, { data }] = useMutation(UPDATE_USER);
   const [isSearchTriggered, setIsSearchTriggered] = useState<boolean>(false);
-  const [showUserUpdatedMessage, setShowUserUpdatedMessage] = useState<boolean>(
-    false
-  );
+  const [showUserUpdatedMessage, setShowUserUpdatedMessage] =
+    useState<boolean>(false);
 
   const onSearchSubmit = (searchTerm: string) => {
     fetchProperties({ variables: { search: searchTerm, limit: 10 } });
@@ -91,26 +91,32 @@ export const HomePage = () => {
   };
 
   return (
-    <div className="h-full p-6">
+    <div className="h-full px-3 lg:px-6 py-6">
       <SearchBar onSearchSubmit={onSearchSubmit}></SearchBar>
 
-      {loadingProperties && <div>Fetching data...</div>}
-      {errorProperties && <div>Error: {errorProperties}</div>}
-      <div className="grid md:grid-cols-3 grid-cols-1 gap-3 gap-y-8 mt-4">
-        {properties &&
-          properties.length > 0 &&
-          properties.map((property: Property, index: number) => (
-            <Link to={`/property/${property.id}`} key={index}>
-              <ResultCard property={property}></ResultCard>
-            </Link>
-          ))}
-      </div>
-
-      {isSearchTriggered && properties && properties?.length === 0 && (
-        <div className="h-1/2 flex items-center justify-center w-full text-gray-400 text-lg">
-          Nema rezultata
+      <div className="mt-4 lg:mt-8">
+        {loadingProperties && <div>Fetching data...</div>}
+        {errorProperties && <div>Error: {errorProperties}</div>}
+        <div className="grid md:grid-cols-3 grid-cols-1 gap-3 gap-y-8 mt-4">
+          {properties &&
+            properties.length > 0 &&
+            properties.map((property: Property, index: number) => (
+              <Link to={`/property/${property.id}`} key={index}>
+                <ResultCard property={property}></ResultCard>
+              </Link>
+            ))}
         </div>
-      )}
+
+        {!isSearchTriggered && !properties && (
+          <EmptyAsset type={EmptyAssetTypes.SEARCH} />
+        )}
+
+        {isSearchTriggered && properties && properties?.length === 0 && (
+          <div className="h-1/2 flex items-center justify-center w-full text-gray-400 text-lg">
+            Nema rezultata
+          </div>
+        )}
+      </div>
 
       {user && (
         <>
@@ -129,21 +135,6 @@ export const HomePage = () => {
                 Korisnik je uspješno ažuriran!
               </div>
             )}
-          </div>
-
-          <div>
-            <h1 className="mt-4 mb-3 text-lg font-bold text-gray-700">
-              Favorizovani listovi nepokretnosti
-            </h1>
-            <div className="grid md:grid-cols-3 grid-cols-1 gap-3 gap-y-8">
-              {favoriteProperties &&
-                favoriteProperties.length > 0 &&
-                favoriteProperties.map((property: Property, index: number) => (
-                  <Link to={`/property/${property.id}`} key={index}>
-                    <ResultCard property={property}></ResultCard>
-                  </Link>
-                ))}
-            </div>
           </div>
         </>
       )}
