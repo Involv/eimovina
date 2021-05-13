@@ -1,5 +1,5 @@
 import { gql, useQuery, useMutation } from "@apollo/client";
-import React, { useContext, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { PropertyResponse } from "../../../models/property-response.model";
 import { AuthorizationContext } from "../../authentification/components/Authorization";
@@ -12,6 +12,7 @@ import {
   OfficeBuildingIcon,
   CurrencyEuroIcon,
 } from "@heroicons/react/outline";
+import { BookmarkIcon } from "@heroicons/react/solid";
 import { StarIcon as PopulatedStarIcon } from "@heroicons/react/solid";
 import { Tabs } from "../../../components/Tabs";
 import { Loan } from "../../../models/loan.model";
@@ -23,6 +24,7 @@ import { PlotPartCard } from "../components/PlotPartCard";
 import { PlotPart } from "../../../models/plot-part.model";
 import { RightHolderCard } from "../components/RightHolderCard25";
 import { TabInterface } from "../../../models/tabs.interface";
+import { UpdateFavoritePropertyResponse } from "../../../models/update-favorite-property.response";
 
 const FETCH_PROPERTY_QUERY = gql`
   query MyQuery($id: ID!) {
@@ -30,6 +32,7 @@ const FETCH_PROPERTY_QUERY = gql`
       id
       realEstateListNumber
       plotNumber
+      isFavorite
       address
       area
       loans {
@@ -107,40 +110,59 @@ export const Property = () => {
     objects = [],
   } = property || {};
 
-  const isFavorite = false;
-
-  const [favorizeProperty, { data }] = useMutation(FAVORIZE_PROPERTY);
+  const [favorizeProperty] =
+    useMutation<UpdateFavoritePropertyResponse>(FAVORIZE_PROPERTY);
 
   const { user } = useContext(AuthorizationContext);
 
   const [activeTab, setActiveTab] = useState<number>(0);
+  const [isFavorite, setIsFavorite] = useState<boolean>(false);
 
-  const onFavorizeProperty = () => {
-    favorizeProperty({ variables: { propertyId: id } });
+  useEffect(() => {
+    if (property) {
+      setIsFavorite(property?.isFavorite || false);
+    }
+  }, [property]);
+
+  const onFavorizeProperty = async () => {
+    const response = await favorizeProperty({
+      variables: { propertyId: id },
+    });
+    const favoriteIds =
+      response.data?.updateFavoritePropertyId?.favoritePropertyIds;
+    setIsFavorite(favoriteIds?.includes(id) || false);
   };
 
-  const handleTabClick = (type: PropertyTabs) => setActiveTab(type);
+  const handleTabClick = (type: PropertyTabs) => {
+    console.log({ type });
+    setActiveTab(type);
+  };
 
   return (
-    <div className="h-full p-6">
-      <div className="bg-white rounded-lg border border-gray-100">
-        <div className="flex items-center justify-between px-8 pt-8">
+    <div className="h-full p-0 lg:p-6">
+      <div className="bg-white rounded-lg border border-gray-100 text-sm relative pt-8">
+        <div className="flex items-center justify-between p-5 lg:px-8">
           <div className="flex items-center">
-            <DocumentTextIcon className="w-14 text-purple-300 mr-6" />
+            <div className="relative mr-2 lg:mr-6">
+              <DocumentTextIcon className="w-12 lg:w-14 text-purple-300" />
+              {isFavorite && (
+                <BookmarkIcon className="absolute w-6 lg:w-7 text-purple-700 left-4 lg:left-5 -bottom-1" />
+              )}
+            </div>
             <div className="flex items-center">
               <div className="flex flex-col">
                 <span className="text-xl font-bold text-gray-700">
                   {property?.realEstateListNumber || "-"}
                 </span>
-                <span className="text-xs text-gray-500 uppercase tracking-wider leading-7">
+                <span className="text-xs text-gray-500 uppercase tracking-wider leading-5 lg:leading-7">
                   Nepokretni list
                 </span>
               </div>
-              <div className="flex flex-col ml-8">
+              <div className="flex flex-col ml-4 lg:ml-8">
                 <span className="text-xl font-bold text-gray-700">
                   {property?.plotNumber || "-"}
                 </span>
-                <span className="text-xs text-gray-500 uppercase tracking-wider leading-7">
+                <span className="text-xs text-gray-500 uppercase tracking-wider leading-5 lg:leading-7">
                   Broj parcele
                 </span>
               </div>
@@ -150,27 +172,27 @@ export const Property = () => {
           {user && (
             <div
               onClick={onFavorizeProperty}
-              className="flex items-center cursor-pointer text-purple-700 bg-purple-200 py-2 px-4 rounded hover:bg-purple-50 hover:text-purple-500"
+              className="flex items-center cursor-pointer text-purple-700 bg-purple-200 py-2 px-2 lg:px-4 rounded hover:bg-purple-50 hover:text-purple-500"
             >
-              {isFavorite ? (
-                <PopulatedStarIcon className="w-8" />
+              {!isFavorite ? (
+                <PopulatedStarIcon className="w-6 lg:w-8" />
               ) : (
-                <StarIcon className="w-8" />
+                <StarIcon className="w-6 lg:w-8" />
               )}
-              <span className="text-sm font-bold ml-2 uppercase tracking-wider">
-                {isFavorite ? "Fazvorizuj" : "Ukloni iz favorizovanih"}
+              <span className="text-sm font-bold ml-2 uppercase tracking-wider hidden lg:block">
+                {!isFavorite ? "Fazvorizuj" : "Ukloni iz favorizovanih"}
               </span>
             </div>
           )}
         </div>
 
-        <div className="flex flex-col mt-4 px-8">
+        {/* <div className="flex flex-col mt-4 px-5 lg:px-8">
           <span className="text-lg">{property?.address?.trim() || "-"}</span>
           <span className="flex items-center text-gray-700 leading-7">
             <LocationMarkerIcon className="w-4" />
             Adresa
           </span>
-        </div>
+        </div> */}
 
         <div className="mt-6">
           <Tabs
@@ -179,7 +201,7 @@ export const Property = () => {
             onClickHandler={(index: number) => handleTabClick(index)}
           />
 
-          <div className="px-8 py-4 bg-gray-200">
+          <div className="px-5 lg:px-8 py-4 bg-gray-200">
             {activeTab === PropertyTabs.rightHolders && (
               <>
                 <div className="grid md:grid-cols-3 grid-cols-1 gap-3 gap-y-8 mt-4">

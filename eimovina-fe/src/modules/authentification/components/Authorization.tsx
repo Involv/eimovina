@@ -25,25 +25,7 @@ const Authorization: FC = ({ children }) => {
 
   const getUser = (): CognitoUser | null => {
     const user = UserPool.getCurrentUser();
-    user?.getSession((err: Error | null, data: CognitoUserSession | null) => {
-      console.log({ data });
-      if (err) {
-        // Prompt the user to reauthenticate by hand...
-      } else {
-        const cognitoUserSession = data;
-        const accessToken = cognitoUserSession?.getAccessToken()?.getJwtToken();
-        if (accessToken) {
-          localStorage.setItem(
-            LocalStorageKeys.eimovinaAccessToken,
-            accessToken
-          );
-        }
-      }
-    });
-    if (user) {
-      return user;
-    }
-    return null;
+    return user || null;
   };
 
   useEffect(() => {
@@ -107,8 +89,6 @@ const Authorization: FC = ({ children }) => {
         Username,
         Pool: UserPool,
       });
-
-      console.log("dodje li odje");
 
       user.confirmRegistration(code, true, (err, result) => {
         if (err) {

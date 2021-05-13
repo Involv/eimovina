@@ -7,7 +7,7 @@ export const Nav = () => {
   const { logout, user } = useContext(AuthorizationContext);
 
   return (
-    <div className="bg-gray-700 px-3 lg:px-6 py-6">
+    <div className="bg-gray-700 px-5 lg:px-8 py-6">
       <div className="flex justify-between items-center">
         <Link className="font-light text-2xl text-white" to="/">
           E-Imovina

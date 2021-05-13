@@ -16,7 +16,7 @@ const mapEmptyAssetTypeToImageFile = (type: EmptyAssetTypes) => {
       return "undraw_File_searching_re_3evy.svg";
     }
     case EmptyAssetTypes.FAVORITE: {
-      return "undraw_my_documents_ym8x";
+      return "undraw_Done_checking_re_6vyx.svg";
     }
     default: {
       return "";
@@ -28,7 +28,7 @@ export const EmptyAsset: FC<EmptyAssetProps> = ({ type, text }) => {
   const imageSrc = `/empty-assets/${mapEmptyAssetTypeToImageFile(type)}`;
   return (
     <div className="w-full flex flex-col items-center justify-center py-8">
-      <img src={imageSrc} className="max-w-xs lg:max-w-sm" />
+      <img src={imageSrc} className="max-w-xs lg:max-w-sm opacity-80" />
       <div>{text}</div>
     </div>
   );

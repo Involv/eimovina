@@ -12,7 +12,7 @@ export const Tabs: FC<TabsInterface> = ({
 }) => {
   return (
     <div>
-      <div className="sm:hidden px-7 mb-6">
+      <div className="sm:hidden px-5 lg:px-7 mb-6">
         <label htmlFor="tabs" className="sr-only">
           Select a tab
         </label>
@@ -21,9 +21,14 @@ export const Tabs: FC<TabsInterface> = ({
           name="tabs"
           className="block w-full focus:ring-indigo-500 focus:border-indigo-500 border-gray-300 rounded-md"
           defaultValue={tabs[activeTab].name}
+          onChange={(event: React.ChangeEvent<HTMLSelectElement>) =>
+            onClickHandler(+event.target.value)
+          }
         >
           {tabs.map((tab) => (
-            <option key={tab.name}>{tab.name}</option>
+            <option key={tab.name} value={tab.code}>
+              {tab.name}
+            </option>
           ))}
         </select>
       </div>

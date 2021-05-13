@@ -26,11 +26,13 @@ export const FavoritesPage = () => {
     data: { getUserFavoriteProperties: favoriteProperties = null } = {},
     loading,
     error,
-  } = useQuery<FavoritePropertiesResponse>(FETCH_FAVORITE_PROPERTIES);
+  } = useQuery<FavoritePropertiesResponse>(FETCH_FAVORITE_PROPERTIES, {
+    fetchPolicy: "network-only",
+  });
 
   return (
     <div className="h-full px-3 lg:px-6 py-6">
-      <h1 className="mt-4 mb-3 text-lg font-bold text-gray-700">
+      <h1 className="mt-4 mb-3 text-xl lg:text-2xl font-light text-purple-700 tracking-wide">
         Favorizovani listovi nepokretnosti
       </h1>
       {loading && <div>Fetching data...</div>}
@@ -44,6 +46,11 @@ export const FavoritesPage = () => {
             </Link>
           ))}
       </div>
+
+      {!favoriteProperties ||
+        (favoriteProperties.length === 0 && (
+          <EmptyAsset type={EmptyAssetTypes.FAVORITE} />
+        ))}
     </div>
   );
 };

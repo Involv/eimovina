@@ -49,16 +49,6 @@ export const ResultCard: FC<ResultCardProps> = ({ property }) => {
             </span>
           </div>
         </div>
-        {/* <div className="text-gray-700 text-base">
-          {property.objects &&
-            property.objects.map((object: Object, index: number) => (
-              <div key={index} className="mt-3">
-                <div>area: {object.area}</div>
-                <div>roomCount: {object.roomCount}</div>
-                <div>usagePurpose: {object.usagePurpose}</div>
-              </div>
-            ))}
-        </div> */}
       </div>
       {property.isFavorite && (
         <BookmarkIcon className="absolute top-0 right-6 text-purple-700 w-8" />

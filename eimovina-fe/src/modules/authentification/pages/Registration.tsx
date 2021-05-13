@@ -42,8 +42,6 @@ export const Registration = () => {
   };
 
   const handleOnConfirm = () => {
-    console.log({ email });
-    console.log({ code });
     confirmRegistration(email, code)
       .then(() => {
         console.log("Success");
@@ -83,7 +81,7 @@ export const Registration = () => {
 
   return (
     <div className="h-full flex items-center justify-center column flex-col	">
-      <div className="max-w-md rounded overflow-hidden shadow-lg p-6 bg-white">
+      <div className="max-w-md rounded overflow-hidden shadow-lg p-6 bg-white mx-4">
         <div className="text-3xl font-light tracking-wide text-center">
           EImovina Registration
         </div>
