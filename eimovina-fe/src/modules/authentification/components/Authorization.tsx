@@ -43,6 +43,13 @@ const Authorization: FC = ({ children }) => {
               reject();
             } else {
               console.log({ session });
+              const accessToken = session?.getAccessToken().getJwtToken();
+              if (accessToken) {
+                localStorage.setItem(
+                  LocalStorageKeys.eimovinaAccessToken,
+                  accessToken
+                );
+              }
               resolve(session);
             }
           }

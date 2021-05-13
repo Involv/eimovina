@@ -7,7 +7,6 @@ import {
   ApolloClient,
   InMemoryCache,
   HttpLink,
-  concat,
   from,
   ApolloLink,
 } from "@apollo/client";
@@ -54,7 +53,6 @@ const errorLink = onError(
 
 const client = new ApolloClient({
   cache: new InMemoryCache(),
-  // link: concat(authMiddleware, httpLink),
   link: from([errorLink, authMiddleware, httpLink]),
 });
 

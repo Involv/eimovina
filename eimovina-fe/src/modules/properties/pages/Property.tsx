@@ -101,6 +101,7 @@ export const Property = () => {
     error,
   } = useQuery<PropertyResponse, { id: string }>(FETCH_PROPERTY_QUERY, {
     variables: { id },
+    fetchPolicy: "network-only",
   });
 
   const {
