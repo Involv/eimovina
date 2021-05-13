@@ -1,9 +1,8 @@
-export interface Object {
+export interface PlotPart {
   area: string;
   roomCount: string;
   usagePurpose: string;
-  objectNumber: string;
   buildingNumber: string;
-  storey: string;
   address: string;
+  entryDate: string;
 }

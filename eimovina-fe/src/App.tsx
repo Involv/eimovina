@@ -9,6 +9,7 @@ import { Nav } from "./components/Nav";
 import { Authorization } from "./modules/authentification/components/Authorization";
 import { ToastProvider } from "react-toast-notifications";
 import { Property } from "./modules/properties/pages/Property";
+import { FavoritesPage } from "./modules/home/pages/FavoritesPage";
 
 function App() {
   return (
@@ -28,6 +29,13 @@ function App() {
                 <HomePage />
               </>
             </Route>
+            <Route exact path="/favorites">
+              <>
+                <Nav></Nav>
+                <FavoritesPage />
+              </>
+            </Route>
+
             <Route exact path="/property/:id">
               <>
                 <Nav></Nav>
