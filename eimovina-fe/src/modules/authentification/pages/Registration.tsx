@@ -15,14 +15,8 @@ export const Registration = () => {
 
   const { addToast } = useToasts();
 
-<<<<<<< HEAD
   const { confirmRegistration, resendConfirmationCode } =
     useContext(AuthorizationContext);
-=======
-  const { confirmRegistration, resendConfirmationCode } = useContext(
-    AuthorizationContext
-  );
->>>>>>> dev
 
   const attributeName = new CognitoUserAttribute({ Name: "name", Value: name });
 
