@@ -10,8 +10,9 @@ export const main = async (event) => {
   const newFavoritePropertyIds = addOrRemoveFromArray(propertyId, user.favoritePropertyIds);
   const newFavoriteBy = addOrRemoveFromArray(username, property.favoriteBy);
 
-  await updateArray(propertyId, newFavoriteBy, 'favoriteBy', process.env.PROPERTY_TABLE);
   const updatedUser = await updateArray(username, newFavoritePropertyIds, 'favoritePropertyIds', process.env.USERS_TABLE);
+  await updateArray(propertyId, newFavoriteBy, 'favoriteBy', process.env.PROPERTY_TABLE);
+
   return updatedUser.Attributes;
 };
 
