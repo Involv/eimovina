@@ -2,7 +2,7 @@ name: deploy backend
 
 on:
   push:
-    branches: [ dev ]
+    branches: [ dev, main ]
     paths:
       - "eimovina-be/**"
       - ".github/workflows/backend-deploy.yml"
