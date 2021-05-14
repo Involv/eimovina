@@ -3,8 +3,10 @@ export const main = async (event) => {
     console.log("EVENT", JSON.stringify(event, null, 8));
     event.response.emailSubject = "Welcome to the EImovina";
     const { codeParameter } = event.request;
-   event.response.emailMessage = "Thank you for signing up. Your verification code is " + codeParameter + ".";
-
+    event.response.emailMessage =
+      "Thank you for signing up. Your verification code is " +
+      codeParameter +
+      ".";
   }
   return event;
 };

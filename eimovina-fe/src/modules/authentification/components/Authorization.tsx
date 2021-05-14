@@ -23,8 +23,14 @@ const AuthorizationContext = createContext<AuthorizationContextProps>(
 const Authorization: FC = ({ children }) => {
   const [user, setUser] = useState<CognitoUser | null>(null);
 
+  const getUser = (): CognitoUser | null => {
+    const user = UserPool.getCurrentUser();
+    return user || null;
+  };
+
   useEffect(() => {
-    getSession().then(() => setUser(UserPool.getCurrentUser()));
+    // getSession().then(() => setUser(UserPool.getCurrentUser()));
+    setUser(UserPool.getCurrentUser());
   }, []);
 
   const getSession = async () =>
@@ -36,6 +42,14 @@ const Authorization: FC = ({ children }) => {
             if (err) {
               reject();
             } else {
+              console.log({ session });
+              const accessToken = session?.getAccessToken().getJwtToken();
+              if (accessToken) {
+                localStorage.setItem(
+                  LocalStorageKeys.eimovinaAccessToken,
+                  accessToken
+                );
+              }
               resolve(session);
             }
           }
@@ -83,8 +97,6 @@ const Authorization: FC = ({ children }) => {
         Pool: UserPool,
       });
 
-      console.log("dodje li odje");
-
       user.confirmRegistration(code, true, (err, result) => {
         if (err) {
           console.log({ err });
@@ -129,7 +141,7 @@ const Authorization: FC = ({ children }) => {
         resendConfirmationCode,
         getSession,
         logout,
-        user,
+        user: getUser(),
       }}
     >
       {children}
