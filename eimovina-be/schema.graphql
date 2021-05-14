@@ -10,6 +10,8 @@ type Query {
   getProperties(search: String, limit: Int!, nextToken: String): PropertiesPage
     @aws_api_key
     @aws_cognito_user_pools
+  getProperty(id: ID!): PropertyUI @aws_api_key @aws_cognito_user_pools
+  getUserFavoriteProperties: [Property!]
 }
 
 type Mutation {
@@ -29,7 +31,7 @@ type PropertiesPage @aws_api_key @aws_cognito_user_pools {
   nextToken: String
 }
 
-type Property @aws_api_key @aws_cognito_user_pools {
+interface IProperty {
   id: ID!
   realEstateListNumber: String!
   plotNumber: String!
@@ -41,6 +43,37 @@ type Property @aws_api_key @aws_cognito_user_pools {
   loans: [Loan]
   municipalityId: String
   submunicipalityId: String
+}
+
+type Property implements IProperty @aws_api_key @aws_cognito_user_pools {
+  id: ID!
+  realEstateListNumber: String!
+  plotNumber: String!
+  address: String
+  area: String
+  rightHolders: [RightHolder]
+  plotParts: [PlotPart]
+  objects: [Object]
+  loans: [Loan]
+  municipalityId: String
+  submunicipalityId: String
+}
+
+type PropertyUI implements IProperty
+  @aws_api_key
+  @aws_cognito_user_pools {
+  id: ID!
+  realEstateListNumber: String!
+  plotNumber: String!
+  address: String
+  area: String
+  rightHolders: [RightHolder]
+  plotParts: [PlotPart]
+  objects: [Object]
+  loans: [Loan]
+  municipalityId: String
+  submunicipalityId: String
+  isFavorite: Boolean
 }
 
 type RightHolder @aws_api_key @aws_cognito_user_pools {
@@ -76,7 +109,7 @@ type Loan @aws_api_key @aws_cognito_user_pools {
   usagePurpose: String!
   loanNumber: String!
   buildingNumber: String!
-  serialNumber: Int!
+  serialNumber: String!
   description: String!
 }
 

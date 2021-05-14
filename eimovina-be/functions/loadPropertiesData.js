@@ -63,8 +63,8 @@ const mapProperties = data => {
   const municipalityId = list.poid || "";
   const submunicipalityId = list.koid || "";
   const realEstateListNumber = list.broj_lista || "";
-  const id = `${municipalityId}/` +
-  `${submunicipalityId}/` +
+  const id = `${municipalityId}-` +
+  `${submunicipalityId}-` +
   `${realEstateListNumber}`;
 
   const params = {
@@ -92,9 +92,9 @@ const mapRightHolders = data => {
   const result = [];
   data.forEach(item => {
     result.push({
-      name: item.imePrezime,
-      rightsScope: item.udeo,
-      rightsType: item.vrstaPrava
+      name: item.imePrezime || "",
+      rightsScope: item.udeo || "",
+      rightsType: item.vrstaPrava || ""
     });
   });
 
@@ -105,15 +105,15 @@ const mapPlotParts = data => {
   const result = [];
   data.forEach(item => {
     result.push({
-      usagePurpose: item.nacinKoriscenja,
-      address: item.address,
-      area: item.povrsina,
-      buildingNumber: item.broj,
-      entryDate: item.regdate,
-      basisOfAcquisition: item.osnov,
-      income: item.prihod,
-      plan: item.plan,
-      sketch: item.skica
+      usagePurpose: item.nacinKoriscenja || "",
+      address: item.address || "",
+      area: item.povrsina || "",
+      buildingNumber: item.broj || "",
+      entryDate: item.regdate || "",
+      basisOfAcquisition: item.osnov || "",
+      income: item.prihod || "",
+      plan: item.plan || "",
+      sketch: item.skica || "",
     });
   });
 
@@ -124,14 +124,14 @@ const mapObjects = data => {
   const result = [];
   data.forEach(item => {
     result.push({
-      usagePurpose: item.nacinKoriscenja,
-      objectNumber: item.pd,
-      roomCount: item.soba,
-      address: item.adresa,
-      buildingNumber: item.redniBroj,
-      area: item.povrsina,
-      storey: item.spratnost,
-      basisOfAcquisition: item.osnov
+      usagePurpose: item.nacinKoriscenja || "",
+      objectNumber: item.pd || "",
+      roomCount: item.soba || "",
+      address: item.adresa || "",
+      buildingNumber: item.redniBroj || "",
+      area: item.povrsina || "",
+      storey: item.spratnost || "",
+      basisOfAcquisition: item.osnov || ""
     });
   });
 
@@ -142,11 +142,11 @@ const mapLoans = data => {
   const result = [];
   data.forEach(item => {
     result.push({
-      usagePurpose: item.nacinKoriscenja,
-      loanNumber: item.brojTereta,
-      buildingNumber: item.redniBroj,
-      serialNumber: item.ns,
-      description: item.opis,
+      usagePurpose: item.nacinKoriscenja || "",
+      loanNumber: item.brojTereta || "",
+      buildingNumber: item.redniBroj || "",
+      serialNumber: item.ns || "",
+      description: item.opis || "",
     });
   });
 

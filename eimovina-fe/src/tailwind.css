@@ -2,3 +2,21 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer components {
+  .active-tab-dot {
+    position: relative;
+    display: inline-block;
+  }
+
+  .active-tab-dot::after {
+    content: "";
+    width: 4px;
+    height: 4px;
+    background: white;
+    position: absolute;
+    left: 50%;
+    top: 34px;
+    transform: translate(-50%, 0);
+  }
+}
