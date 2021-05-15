@@ -23,7 +23,7 @@ provider:
     AWS_NODEJS_CONNECTION_REUSE_ENABLED: "1"
     ALGOLIA_APP_ID: ${ssm:eimovina-be-algolia-app-id}
     ALGOLIA_ADMIN_API_KEY: ${ssm:eimovina-be-algolia-admin-api-key}
-    ALGOLIA_INDEX_NAME: eimovina-be-property-index
+    ALGOLIA_INDEX_NAME: eimovina-be-${self:custom.stage}-property-index
 
 custom:
   stage: ${opt:stage, self:provider.stage}
@@ -228,7 +228,7 @@ resources:
     CognitoDomain:
       Type: AWS::Cognito::UserPoolDomain
       Properties:
-        Domain: eimovina-be-stefan
+        Domain: eimovina-be-${self:custom.stage}
         UserPoolId: !Ref CognitoUserPool
 
     UserPoolInvokeConfirmUserSignupLambdaPermission:
