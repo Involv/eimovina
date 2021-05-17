@@ -16,7 +16,7 @@ plugins:
 provider:
   name: aws
   runtime: nodejs14.x
-  stage: dev
+  stage: ${opt:stage, 'dev'}
   region: eu-central-1
   environment:
     STAGE: ${self:custom.stage}
