@@ -2,7 +2,7 @@ name: deploy frontend
 
 on:
   push:
-    branches: [ dev ]
+    branches: [ dev, main ]
     paths:
       - "eimovina-fe/**"
       - ".github/workflows/frontend-deploy.yml"
