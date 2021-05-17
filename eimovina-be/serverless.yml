@@ -113,7 +113,7 @@ functions:
   notify:
     handler: functions/notify.main
     environment:
-      GRAPHQL_API_URL: !GetAtt Eimovinabe${self:custom.stage}GraphQlApi.GraphQLUrl
+      GRAPHQL_API_URL: !GetAtt EimovinabedevGraphQlApi.GraphQLUrl
       PROPERTY_TABLE: !Ref PropertyTable
       USERS_TABLE: !Ref UsersTable
     events:
@@ -123,7 +123,7 @@ functions:
     iamRoleStatements:
       - Effect: Allow
         Action: appsync:GraphQL
-        Resource: !Sub ${Eimovinabe${self:custom.stage}GraphQlApi.Arn}/*
+        Resource: !Sub ${EimovinabedevGraphQlApi.Arn}/*
 
   notifyPropertyUpdated:
     handler: functions/notifyPropertyUpdated.main
